@@ -13,7 +13,7 @@
 <header class="topbar">
   <div class="brand">Intuit Field Dispatcher Demo</div>
   <div class="numbers">
-    <span><em>Tech</em> <code id="hdr-tech">…</code></span>
+    <span><em>Field Tech</em> <code id="hdr-tech">…</code></span>
     <span><em>AI</em> <code id="hdr-ai">…</code></span>
     <span><em>Dispatcher</em> <code id="hdr-admin">…</code></span>
   </div>
@@ -28,6 +28,7 @@
       <h2>Technician view <button type="button" class="refresh-btn small" data-refresh title="Refresh">↻ Refresh</button></h2>
       <div class="sub">SMS thread on tech's phone (<span id="tech-phone">…</span>)</div>
     </div>
+    <div class="memory-panel" id="tech-memory"></div>
     <div class="thread" id="tech-thread"></div>
     <form class="composer" id="tech-form">
       <textarea id="tech-input" placeholder="Simulate an SMS from the technician…" rows="2"></textarea>
@@ -49,6 +50,7 @@
         </div>
       </form>
     </div>
+    <div class="memory-panel" id="admin-memory"></div>
     <div class="thread" id="admin-thread"></div>
     <form class="composer" id="admin-form">
       <textarea id="admin-input" placeholder="Send a real SMS to the technician as the dispatcher…" rows="2"></textarea>

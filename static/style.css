@@ -417,3 +417,84 @@ body {
   border-radius: 3px;
   font-family: var(--font-sans);
 }
+
+.memory-panel { margin: 10px 20px 0; }
+.memory-panel:empty { display: none; }
+.mem-error, .mem-empty {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px dotted var(--line);
+  border-radius: 3px;
+  font-family: var(--font-serif);
+}
+.mem-details {
+  background: var(--violet-soft);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--violet);
+  border-radius: 3px;
+  padding: 6px 12px 10px;
+  font-size: 12.5px;
+}
+.mem-details > summary {
+  cursor: pointer;
+  padding: 4px 0;
+  color: var(--text);
+  font-weight: 500;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.mem-details > summary::-webkit-details-marker { display: none; }
+.mem-details > summary::before {
+  content: '▸';
+  margin-right: 6px;
+  color: var(--violet);
+  transition: transform 0.15s;
+  display: inline-block;
+}
+.mem-details[open] > summary::before { transform: rotate(90deg); }
+.mem-title { font-family: var(--font-serif); font-size: 14px; }
+.mem-counts { color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; }
+.mem-section-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin: 10px 0 4px;
+  font-weight: 600;
+}
+.mem-row {
+  padding: 6px 8px;
+  margin: 3px 0;
+  background: var(--bg);
+  border-radius: 3px;
+  border: 1px dotted var(--line);
+}
+.mem-row.current { border-color: var(--violet); background: var(--violet-soft); }
+.mem-row.obs { background: var(--bg-alt); }
+.mem-meta {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+.mem-conv { background: var(--panel); padding: 1px 4px; border-radius: 2px; color: var(--text-dim); }
+.mem-conv em { color: var(--violet); font-style: normal; font-weight: 600; }
+.mem-when { color: var(--text-dim); }
+.mem-source { color: var(--text-faint); }
+.mem-body {
+  color: var(--text);
+  line-height: 1.45;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  white-space: pre-wrap;
+}

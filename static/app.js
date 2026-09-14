@@ -12,6 +12,8 @@ const els = {
   assignPhone: document.getElementById('assign-phone'),
   techThread: document.getElementById('tech-thread'),
   adminThread: document.getElementById('admin-thread'),
+  techMemory: document.getElementById('tech-memory'),
+  adminMemory: document.getElementById('admin-memory'),
   profilesList: document.getElementById('profiles-list'),
   techForm: document.getElementById('tech-form'),
   techInput: document.getElementById('tech-input'),
@@ -164,6 +166,80 @@ function renderProfiles(s) {
   }
 }
 
+function renderMemoryPanel(container, memory, currentConvId) {
+  container.innerHTML = '';
+  if (!memory) return;
+  if (memory.error) {
+    const e = document.createElement('div');
+    e.className = 'mem-error';
+    e.textContent = `Memory unavailable: ${memory.error}`;
+    container.appendChild(e);
+    return;
+  }
+  const summaries = (memory.summaries || []).slice().sort((a, b) => (b.occurredAt || '').localeCompare(a.occurredAt || ''));
+  const observations = (memory.observations || []).slice().sort((a, b) => (b.occurredAt || '').localeCompare(a.occurredAt || ''));
+  if (summaries.length === 0 && observations.length === 0) {
+    const e = document.createElement('div');
+    e.className = 'mem-empty';
+    e.textContent = 'No job memory yet. Summaries and observations appear here after a conversation closes.';
+    container.appendChild(e);
+    return;
+  }
+
+  const details = document.createElement('details');
+  details.className = 'mem-details';
+  details.open = true;
+  const summary = document.createElement('summary');
+  summary.innerHTML = `<span class="mem-title">Job memory</span> <span class="mem-counts">${summaries.length} summary · ${observations.length} obs</span>`;
+  details.appendChild(summary);
+
+  if (summaries.length > 0) {
+    const h = document.createElement('div');
+    h.className = 'mem-section-head';
+    h.textContent = 'Summaries (across conversations)';
+    details.appendChild(h);
+    for (const s of summaries) {
+      const row = document.createElement('div');
+      row.className = 'mem-row summary';
+      if (s.conversationId && currentConvId && s.conversationId === currentConvId) row.classList.add('current');
+      const meta = document.createElement('div');
+      meta.className = 'mem-meta';
+      const convTag = s.conversationId
+        ? `<code class="mem-conv">${s.conversationId.slice(0, 10)}…${s.conversationId === currentConvId ? ' <em>current</em>' : ''}</code>`
+        : '';
+      meta.innerHTML = `${convTag} <span class="mem-when">${fmtRelative(s.occurredAt)}</span> <span class="mem-source">${s.source || ''}</span>`;
+      const body = document.createElement('div');
+      body.className = 'mem-body';
+      body.textContent = s.content || '';
+      row.appendChild(meta);
+      row.appendChild(body);
+      details.appendChild(row);
+    }
+  }
+
+  if (observations.length > 0) {
+    const h = document.createElement('div');
+    h.className = 'mem-section-head';
+    h.textContent = 'Observations';
+    details.appendChild(h);
+    for (const o of observations) {
+      const row = document.createElement('div');
+      row.className = 'mem-row obs';
+      const meta = document.createElement('div');
+      meta.className = 'mem-meta';
+      meta.innerHTML = `<span class="mem-when">${fmtRelative(o.occurredAt)}</span> <span class="mem-source">${o.source || ''}</span>`;
+      const body = document.createElement('div');
+      body.className = 'mem-body';
+      body.textContent = o.content || '';
+      row.appendChild(meta);
+      row.appendChild(body);
+      details.appendChild(row);
+    }
+  }
+
+  container.appendChild(details);
+}
+
 function renderViewNotice(s) {
   // Remove any prior notice.
   document.querySelectorAll('.notice').forEach(n => n.remove());
@@ -181,6 +257,8 @@ function render(s) {
   renderHeader(s);
   const conv = s.viewedConversation || {};
   const msgs = conv.messages || [];
+  renderMemoryPanel(els.techMemory, s.viewedProfileMemory, conv.id);
+  renderMemoryPanel(els.adminMemory, s.viewedProfileMemory, conv.id);
   renderThread(els.techThread, msgs, 'tech');
   renderThread(els.adminThread, msgs, 'admin');
   renderProfiles(s);

@@ -217,6 +217,7 @@ async def get_state(viewedProfileId: str | None = None) -> dict:
     view_id = viewedProfileId or active_id
     viewed_conv = None
     viewed_profile_id = None
+    viewed_memory = None
     if view_id:
         viewed_profile_id = view_id
         conv_id = next((p.get("conversationId") for p in profiles if p.get("id") == view_id), None)
@@ -226,6 +227,14 @@ async def get_state(viewedProfileId: str | None = None) -> dict:
                 viewed_conv["profileId"] = view_id
             except tw.TwilioError as e:
                 viewed_conv = {"error": str(e), "profileId": view_id}
+        # Unscoped Recall = every summary + observation for this (phone, jobID)
+        # profile, across every conversation it has ever had.
+        try:
+            viewed_memory = await tw.recall(
+                STORE_ID, view_id, observations_limit=20, summaries_limit=10
+            )
+        except tw.TwilioError as e:
+            viewed_memory = {"error": str(e)}
 
     return {
         "techPhone": TECH_PHONE,
@@ -236,6 +245,7 @@ async def get_state(viewedProfileId: str | None = None) -> dict:
         "activeProfileId": active_id,
         "viewedProfileId": viewed_profile_id,
         "viewedConversation": viewed_conv,
+        "viewedProfileMemory": viewed_memory,
     }
 
 
@@ -690,9 +700,7 @@ async def _handle_inbound(conversation_id: str, text: str, simulated: bool) -> d
     recall_data = {}
     if profile_id:
         try:
-            recall_data = await tw.recall(
-                STORE_ID, profile_id, conversation_id=conversation_id
-            )
+            recall_data = await tw.recall(STORE_ID, profile_id)
         except tw.TwilioError:
             recall_data = {}
 

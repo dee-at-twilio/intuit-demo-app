@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Composite-Key Memory · Architecture Differentiation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5EFE3;
+    --bg-alt: #EFE7D6;
+    --panel: #FDFAF3;
+    --line: rgba(43, 36, 30, 0.16);
+    --line-strong: rgba(43, 36, 30, 0.35);
+    --text: #2B241E;
+    --text-dim: #6C5F51;
+    --text-faint: #A89A87;
+    --terracotta: #B5502E;
+    --terracotta-soft: rgba(181, 80, 46, 0.12);
+    --dusty-blue: #4E7089;
+    --dusty-blue-soft: rgba(78, 112, 137, 0.12);
+    --ochre: #A87A21;
+    --ochre-soft: rgba(168, 122, 33, 0.13);
+    --violet: #7A6A9E;
+    --violet-soft: rgba(122, 106, 158, 0.12);
+    --danger: #A83A20;
+    --danger-soft: rgba(168, 58, 32, 0.10);
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .deck-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px dotted var(--line-strong);
+    margin-bottom: 32px;
+  }
+  .deck-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .deck-sub {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+
+  .slide {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 36px 40px 40px;
+    margin-bottom: 40px;
+    page-break-after: always;
+  }
+  .slide-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--bg-alt);
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+  .slide.a .slide-tag { color: var(--dusty-blue); background: var(--dusty-blue-soft); }
+  .slide.b .slide-tag { color: var(--danger); background: var(--danger-soft); }
+
+  .slide h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.015em;
+    margin: 0 0 8px;
+    line-height: 1.15;
+  }
+  .slide .kicker {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    max-width: 780px;
+  }
+
+  .body-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .diagram {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 20px;
+  }
+  .diagram-title {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 12px;
+  }
+  .diagram svg { display: block; width: 100%; height: auto; }
+
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .point {
+    padding-left: 14px;
+    border-left: 3px solid var(--line);
+  }
+  .slide.a .point { border-left-color: var(--dusty-blue); }
+  .slide.b .point { border-left-color: var(--danger); }
+  .point h3 {
+    margin: 0 0 4px;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 15.5px;
+    letter-spacing: -0.005em;
+  }
+  .point p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+  .point code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--bg-alt);
+    padding: 1px 4px;
+    border-radius: 2px;
+    color: var(--text);
+  }
+
+  .footer-note {
+    margin-top: 28px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border-left: 3px solid var(--ochre);
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+  .slide.a .footer-note { border-left-color: var(--dusty-blue); }
+  .slide.b .footer-note { border-left-color: var(--danger); }
+
+  @media (max-width: 900px) {
+    .body-grid { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    body { background: white; }
+    .slide { border: none; box-shadow: none; margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <div class="deck-head">
+    <div class="deck-title">Composite-Key Memory · Architecture Differentiation</div>
+    <div class="deck-sub">Intuit · Field Dispatcher · Gated Feature Comparison</div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 1: With composite keys (current implementation)         -->
+  <!-- ============================================================ -->
+  <section class="slide a">
+    <div class="slide-tag">Slide 1 · With Composite Keys</div>
+    <h1>One profile per <em style="font-style: italic;">(phone, jobID)</em>. Job isolation is a Twilio primitive.</h1>
+    <div class="kicker">
+      The gated composite-key feature lets a single technician's phone number resolve to
+      many distinct Memory profiles — one per active or historical job. Twilio holds the
+      identity, the state, and the memory. The application is thin.
+    </div>
+
+    <div class="body-grid">
+      <div class="diagram">
+        <div class="diagram-title">Runtime flow · composite key</div>
+        <svg viewBox="0 0 560 480" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#4E7089"/>
+            </marker>
+          </defs>
+          <style>
+            .lbl { font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; fill: #2B241E; }
+            .lbl-mono { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #6C5F51; }
+            .lbl-title { font-family: 'Fraunces', serif; font-size: 13px; fill: #2B241E; font-weight: 500; }
+            .lbl-small { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; fill: #A89A87; }
+            .box { fill: #FDFAF3; stroke: rgba(43,36,30,0.28); stroke-width: 1; }
+            .box-active { fill: rgba(78,112,137,0.12); stroke: #4E7089; stroke-width: 1.2; }
+            .box-paused { fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
+            .box-done { fill: rgba(122,106,158,0.10); stroke: #7A6A9E; stroke-width: 1; }
+            .flow { stroke: #4E7089; stroke-width: 1.6; fill: none; }
+          </style>
+
+          <!-- tech phone -->
+          <rect class="box" x="20" y="20" width="150" height="46" rx="3"/>
+          <text class="lbl-title" x="95" y="42" text-anchor="middle">Tech phone</text>
+          <text class="lbl-mono" x="95" y="58" text-anchor="middle">+44 7…</text>
+
+          <!-- twilio number -->
+          <rect class="box" x="200" y="20" width="150" height="46" rx="3"/>
+          <text class="lbl-title" x="275" y="42" text-anchor="middle">Twilio AI number</text>
+          <text class="lbl-mono" x="275" y="58" text-anchor="middle">inbound SMS</text>
+
+          <!-- router -->
+          <rect class="box" x="380" y="20" width="160" height="46" rx="3"/>
+          <text class="lbl-title" x="460" y="38" text-anchor="middle">Router</text>
+          <text class="lbl-mono" x="460" y="54" text-anchor="middle">1 lookup:</text>
+          <text class="lbl-mono" x="460" y="66" text-anchor="middle">phone ∧ Job.status=active</text>
+
+          <line class="flow" x1="170" y1="43" x2="200" y2="43" marker-end="url(#arrA)"/>
+          <line class="flow" x1="350" y1="43" x2="380" y2="43" marker-end="url(#arrA)"/>
+
+          <!-- store container -->
+          <rect class="box" x="20" y="110" width="520" height="350" rx="4"/>
+          <text class="lbl-title" x="40" y="132">Memory Store</text>
+          <text class="lbl-small" x="40" y="146">matchingRules: phone AND jobID · enforceUnique: false</text>
+
+          <!-- active profile -->
+          <rect class="box-active" x="40" y="164" width="480" height="86" rx="3"/>
+          <text class="lbl-title" x="52" y="184">Profile (phone, jobID=4521)</text>
+          <text class="lbl-mono" x="452" y="184" text-anchor="end" fill="#4E7089">● active</text>
+          <text class="lbl" x="52" y="204">Conversation A · open</text>
+          <text class="lbl-mono" x="52" y="220">observations: 6 · summaries: 0 (in-flight)</text>
+          <text class="lbl-small" x="52" y="238">participants carry profileId — CINTEL routes summaries here automatically</text>
+
+          <!-- paused profile -->
+          <rect class="box-paused" x="40" y="264" width="480" height="70" rx="3"/>
+          <text class="lbl-title" x="52" y="284">Profile (phone, jobID=4522)</text>
+          <text class="lbl-mono" x="452" y="284" text-anchor="end" fill="#A87A21">● paused</text>
+          <text class="lbl" x="52" y="302">Conversation B · INACTIVE</text>
+          <text class="lbl-mono" x="52" y="318">observations: 3 · summaries: 0</text>
+
+          <!-- completed profile -->
+          <rect class="box-done" x="40" y="348" width="480" height="94" rx="3"/>
+          <text class="lbl-title" x="52" y="368">Profile (phone, jobID=4520)</text>
+          <text class="lbl-mono" x="452" y="368" text-anchor="end" fill="#7A6A9E">● completed / reactivated</text>
+          <text class="lbl" x="52" y="386">Conversations C, D · closed</text>
+          <text class="lbl-mono" x="52" y="402">observations: 11 · summaries: 2</text>
+          <text class="lbl-small" x="52" y="420">Reactivate → new Conversation E on the same profile.</text>
+          <text class="lbl-small" x="52" y="432">Prior summaries are already there for the LLM and the panel.</text>
+
+          <!-- router → store arrow -->
+          <path class="flow" d="M460 66 L460 90 L280 90 L280 110" marker-end="url(#arrA)"/>
+        </svg>
+      </div>
+
+      <div class="points">
+        <div class="point">
+          <h3>Job isolation without an app-side database</h3>
+          <p>Twilio's composite matching rule <code>phone AND jobID</code> resolves the right profile at write time. The app never maintains a <code>phone → active_job</code> lookup table.</p>
+        </div>
+        <div class="point">
+          <h3>Naturally scoped memory</h3>
+          <p>Every observation and summary lives on the job's own profile. <code>Recall</code> returns only that job's history — no cross-job leakage, no client-side filtering.</p>
+        </div>
+        <div class="point">
+          <h3>Concurrent state per technician</h3>
+          <p>One active job, others paused, historical ones completed. Router picks the active one by a single trait check: <code>Job.status = active</code>.</p>
+        </div>
+        <div class="point">
+          <h3>Job history survives conversation churn</h3>
+          <p>Reactivating a job creates a fresh conversation on the same profile. Prior <code>ConversationSummaries</code> are already attached — the LLM sees them via unscoped <code>Recall</code>.</p>
+        </div>
+        <div class="point">
+          <h3>CINTEL summaries land automatically</h3>
+          <p>Post-conversation operator results carry the customer participant's <code>profileId</code>. Summaries and observations are posted to the correct <em>(phone, jobID)</em> profile with no per-job routing logic.</p>
+        </div>
+        <div class="point">
+          <h3>Compliance &amp; auditability</h3>
+          <p>Each job's memory is a discrete, deletable unit. Delete a profile — its observations, summaries, and conversation linkage vanish together. One job, one boundary.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Net effect: the router is one Twilio call. The state of truth is the profile trait. There is no app-side database.
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SLIDE 2: Without composite keys (GA Memory)                   -->
+  <!-- ============================================================ -->
+  <section class="slide b">
+    <div class="slide-tag">Slide 2 · Without Composite Keys · GA Memory</div>
+    <h1>One profile per phone. The application has to rebuild job isolation on top.</h1>
+    <div class="kicker">
+      GA Memory allows only one profile per identifier value. A technician with three concurrent
+      jobs has one profile, and that profile's observations and summaries pool together.
+      Job scoping must be reconstructed in application code and an external database.
+    </div>
+
+    <div class="body-grid">
+      <div class="diagram">
+        <div class="diagram-title">Runtime flow · single-profile fallback</div>
+        <svg viewBox="0 0 560 500" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#A83A20"/>
+            </marker>
+          </defs>
+          <style>
+            .lbl2 { font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; fill: #2B241E; }
+            .lbl2-mono { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #6C5F51; }
+            .lbl2-title { font-family: 'Fraunces', serif; font-size: 13px; fill: #2B241E; font-weight: 500; }
+            .lbl2-small { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; fill: #A89A87; }
+            .lbl2-warn { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #A83A20; }
+            .box2 { fill: #FDFAF3; stroke: rgba(43,36,30,0.28); stroke-width: 1; }
+            .box2-app { fill: rgba(168,58,32,0.08); stroke: #A83A20; stroke-width: 1.2; stroke-dasharray: 4 3; }
+            .box2-shared { fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
+            .flow2 { stroke: #A83A20; stroke-width: 1.6; fill: none; }
+            .flow2-thin { stroke: #6C5F51; stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+          </style>
+
+          <!-- top row: phone, number -->
+          <rect class="box2" x="20" y="20" width="130" height="42" rx="3"/>
+          <text class="lbl2-title" x="85" y="40" text-anchor="middle">Tech phone</text>
+          <text class="lbl2-mono" x="85" y="55" text-anchor="middle">+44 7…</text>
+
+          <rect class="box2" x="180" y="20" width="150" height="42" rx="3"/>
+          <text class="lbl2-title" x="255" y="40" text-anchor="middle">Twilio AI number</text>
+          <text class="lbl2-mono" x="255" y="55" text-anchor="middle">inbound SMS</text>
+
+          <rect class="box2" x="360" y="20" width="180" height="42" rx="3"/>
+          <text class="lbl2-title" x="450" y="40" text-anchor="middle">Router (fat)</text>
+          <text class="lbl2-mono" x="450" y="55" text-anchor="middle">Twilio + DB lookup</text>
+
+          <line class="flow2" x1="150" y1="41" x2="180" y2="41" marker-end="url(#arrB)"/>
+          <line class="flow2" x1="330" y1="41" x2="360" y2="41" marker-end="url(#arrB)"/>
+
+          <!-- app DB (required) -->
+          <rect class="box2-app" x="20" y="100" width="240" height="150" rx="3"/>
+          <text class="lbl2-title" x="32" y="122">Application database</text>
+          <text class="lbl2-warn" x="32" y="138">REQUIRED — new component</text>
+          <text class="lbl2-mono" x="32" y="162">jobs</text>
+          <text class="lbl2-small" x="32" y="176">(job_id, tech_phone, status, started_at, …)</text>
+          <text class="lbl2-mono" x="32" y="198">active_job_for_phone</text>
+          <text class="lbl2-small" x="32" y="212">phone → job_id · single active per tech</text>
+          <text class="lbl2-mono" x="32" y="234">conversation_job_map</text>
+          <text class="lbl2-small" x="32" y="248">conversation_id → job_id</text>
+
+          <!-- Memory profile (single, shared) -->
+          <rect class="box2-shared" x="290" y="100" width="250" height="150" rx="3"/>
+          <text class="lbl2-title" x="302" y="122">Memory profile · phone-only</text>
+          <text class="lbl2-mono" x="302" y="138">one per technician (phone)</text>
+          <text class="lbl2-mono" x="302" y="164">observations (mixed)</text>
+          <text class="lbl2-small" x="302" y="178">must tag jobID in content or source</text>
+          <text class="lbl2-mono" x="302" y="200">summaries (mixed)</text>
+          <text class="lbl2-small" x="302" y="214">one bucket for every job the tech worked</text>
+          <text class="lbl2-small" x="302" y="234">Recall returns everything — filter in app.</text>
+
+          <line class="flow2" x1="450" y1="62" x2="450" y2="88" marker-end="url(#arrB)"/>
+          <line class="flow2-thin" x1="450" y1="80" x2="180" y2="88"/>
+          <text class="lbl2-warn" x="272" y="86" text-anchor="middle">two lookups per inbound message</text>
+
+          <!-- conversations row -->
+          <rect class="box2" x="20" y="290" width="160" height="60" rx="3"/>
+          <text class="lbl2-title" x="100" y="310" text-anchor="middle">Conversation A</text>
+          <text class="lbl2-mono" x="100" y="326" text-anchor="middle">job 4521</text>
+          <text class="lbl2-small" x="100" y="340" text-anchor="middle">app must remember which</text>
+
+          <rect class="box2" x="200" y="290" width="160" height="60" rx="3"/>
+          <text class="lbl2-title" x="280" y="310" text-anchor="middle">Conversation B</text>
+          <text class="lbl2-mono" x="280" y="326" text-anchor="middle">job 4522</text>
+          <text class="lbl2-small" x="280" y="340" text-anchor="middle">shares one profile</text>
+
+          <rect class="box2" x="380" y="290" width="160" height="60" rx="3"/>
+          <text class="lbl2-title" x="460" y="310" text-anchor="middle">Conversation C</text>
+          <text class="lbl2-mono" x="460" y="326" text-anchor="middle">job 4520</text>
+          <text class="lbl2-small" x="460" y="340" text-anchor="middle">with the other two</text>
+
+          <line class="flow2-thin" x1="415" y1="250" x2="100" y2="290"/>
+          <line class="flow2-thin" x1="415" y1="250" x2="280" y2="290"/>
+          <line class="flow2-thin" x1="415" y1="250" x2="460" y2="290"/>
+
+          <!-- warning box -->
+          <rect x="20" y="380" width="520" height="100" rx="3" fill="rgba(168,58,32,0.06)" stroke="#A83A20" stroke-width="1" stroke-dasharray="4 3"/>
+          <text class="lbl2-title" x="32" y="402" fill="#A83A20">Consequences</text>
+          <text class="lbl2" x="32" y="422">▸ CINTEL summary lands on the single profile — content is per-conversation, but they mingle over time.</text>
+          <text class="lbl2" x="32" y="440">▸ Recall for a fresh job returns memories from unrelated prior jobs unless you filter by tag / date / conversationId.</text>
+          <text class="lbl2" x="32" y="458">▸ Job history for a re-opened job must be reconstructed via your DB, not by reading Twilio.</text>
+          <text class="lbl2" x="32" y="476">▸ Deleting one job's memory means selectively deleting observations by tag — no clean profile boundary to drop.</text>
+        </svg>
+      </div>
+
+      <div class="points">
+        <div class="point">
+          <h3>An external database becomes load-bearing</h3>
+          <p>You need <code>jobs</code>, <code>active_job_for_phone</code>, and <code>conversation → job</code> tables. The state of truth splits between Twilio and your DB — and they must stay in sync.</p>
+        </div>
+        <div class="point">
+          <h3>Memory pools across jobs</h3>
+          <p>All observations and summaries attach to one profile. To keep jobs separate you must tag every write with a <code>jobID</code> in <code>source</code> or content, then filter every <code>Recall</code> result client-side.</p>
+        </div>
+        <div class="point">
+          <h3>Context leakage risk</h3>
+          <p>If a filter is missed or a summary is written without a tag, the LLM answering about job 4522 sees observations from job 4521. That is a hard bug to detect and a real risk in a field-service context.</p>
+        </div>
+        <div class="point">
+          <h3>CINTEL summaries need routing logic</h3>
+          <p>The operator result lands on the phone-level profile. To attribute it to a job, the callback handler must look up <code>conversation_id → job_id</code> from your DB and rewrite the summary source or store the mapping elsewhere.</p>
+        </div>
+        <div class="point">
+          <h3>Job history requires a join</h3>
+          <p>“Show me everything from job 4520” is a filtered <code>Recall</code> plus a DB query, not a single profile fetch. Reactivating a job means replaying that join into the LLM prompt.</p>
+        </div>
+        <div class="point">
+          <h3>Higher operational surface</h3>
+          <p>Two systems to back up, two systems to reconcile after a partial failure, two schemas to migrate. Every new job-scoped behavior costs application code and tests.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Net effect: Twilio holds identity for the technician; the application holds identity for the job. Job isolation is now the app's problem — including its correctness, its audit trail, and its failure modes.
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
