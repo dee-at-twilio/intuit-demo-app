@@ -542,34 +542,32 @@
   <section class="slide" data-menu="Benefits" data-menu-group="With composite">
     <div class="slide-inner">
       <div class="eyebrow dusty">With composite keys</div>
-      <h2>What the gated feature actually buys you.</h2>
-      <p class="lede">
+      <h2>Conversations implicitly works</h2>
+      <!-- <p class="lede">
         Each of these is a piece of logic you don't write, a table you don't schema, a
         failure mode you don't own.
-      </p>
+      </p> -->
 
       <div class="points">
         <div class="point dusty">
           <div class="p-title">Job isolation as a Twilio primitive</div>
           <div class="p-desc">
             The matching rule <code>phone AND jobID</code> resolves the right profile at write
-            time. No <code>active_job_for_phone</code> table. No <code>conversation_job_map</code>.
-            No application DB required for routing.
+            time. No external DB required for routing.
           </div>
         </div>
         <div class="point dusty">
           <div class="p-title">Naturally scoped memory</div>
           <div class="p-desc">
             Every observation and summary attaches to the job's own profile. <code>Recall</code>
-            returns only that job's history — no cross-job leakage, no client-side filtering,
-            no tag conventions to police.
+            needs to only return one profile's history .
           </div>
         </div>
         <div class="point dusty">
-          <div class="p-title">Concurrent state per technician</div>
+          <div class="p-title">Conversation job states per technician</div>
           <div class="p-desc">
-            One active, others paused, historical ones completed — all coexist on the same
-            phone. The router picks the active job by a single trait check:
+            One active job, others inactive, historical ones completed — all coexist for the same
+            phone. The router picks the active job by a single trait check: <code>Job.conversation_ID/code> and
             <code>Job.status = active</code>.
           </div>
         </div>
@@ -577,9 +575,7 @@
           <div class="p-title">Job history survives conversation churn</div>
           <div class="p-desc">
             Reactivating a job creates a fresh conversation on the same profile. Prior
-            <code>ConversationSummaries</code> are already attached — the LLM sees them via
-            unscoped <code>Recall</code>, and the UI shows them in a job-memory panel with
-            zero extra plumbing.
+            <code>ConversationSummaries</code> are already attached to the technician's profile (phone, jobID)
           </div>
         </div>
         <div class="point dusty">
@@ -593,16 +589,7 @@
         <div class="point dusty">
           <div class="p-title">Clean deletion &amp; compliance boundary</div>
           <div class="p-desc">
-            Each job's memory is a discrete, deletable unit. Delete a profile — its observations,
-            summaries, and conversation linkage vanish together. One job, one boundary, one call.
-          </div>
-        </div>
-        <div class="point dusty">
-          <div class="p-title">Less code, fewer failure modes</div>
-          <div class="p-desc">
-            No second system to reconcile after a partial webhook failure. No schema to migrate
-            when the job model evolves. Adding a new job-scoped behavior means new profile
-            traits, not new tables + new tests + new sync logic.
+            Each job's memory is a discrete, deletable unit. 
           </div>
         </div>
       </div>
@@ -614,7 +601,7 @@
   <!-- ============================================================ -->
   <section class="slide" data-menu="Bringing it home" data-menu-group="Differentiation">
     <div class="slide-inner">
-      <div class="eyebrow violet">Bringing it home</div>
+      <div class="eyebrow violet">Differentiation</div>
       <h1>The composite-key feature moves job identity from the app into Twilio.</h1>
       <p class="lede">
         Same use case, same channels, same LLM. What changes is where the state of truth
