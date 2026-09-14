@@ -229,6 +229,52 @@ async def recall(
     )
 
 
+async def post_observation(
+    store_id: str,
+    profile_id: str,
+    content: str,
+    source: str,
+    occurred_at: str,
+    conversation_id: str | None = None,
+) -> dict:
+    obs: dict[str, Any] = {
+        "content": content,
+        "source": source,
+        "occurredAt": occurred_at,
+    }
+    if conversation_id:
+        obs["conversationIds"] = [conversation_id]
+    return await _req(
+        "POST",
+        f"{MEMORY_BASE}/Stores/{store_id}/Profiles/{profile_id}/Observations",
+        json={"observations": [obs]},
+    )
+
+
+async def post_conversation_summary(
+    store_id: str,
+    profile_id: str,
+    conversation_id: str,
+    content: str,
+    source: str,
+    occurred_at: str,
+) -> dict:
+    return await _req(
+        "POST",
+        f"{MEMORY_BASE}/Stores/{store_id}/Profiles/{profile_id}/ConversationSummaries",
+        json={
+            "summaries": [
+                {
+                    "conversationId": conversation_id,
+                    "content": content,
+                    "source": source,
+                    "occurredAt": occurred_at,
+                }
+            ]
+        },
+    )
+
+
 # ---------- Conversations classic (v1): channelId minting ----------
 
 async def mint_channel_id(service_sid: str) -> str:

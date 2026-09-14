@@ -577,20 +577,80 @@ async def webhook_probe() -> PlainTextResponse:
 
 @app.post("/webhook/cintel")
 async def cintel_webhook(request: Request) -> PlainTextResponse:
-    """CINTEL post-conversation callback receiver. Observation-only for now —
-    logs the payload so we can inspect its shape before wiring up profile writes."""
-    content_type = (request.headers.get("content-type") or "").lower()
-    log.info(
-        "POST /webhook/cintel content-type=%r headers=%s",
-        content_type,
-        dict(request.headers),
-    )
+    """CINTEL post-conversation callback. Routes operator results to Memory:
+      - outputFormat=TEXT (e.g. Summary) -> POST /ConversationSummaries
+      - outputFormat=CLASSIFICATION (e.g. Sentiment) -> POST /Observations
+    Target profile is taken from the CUSTOMER participant in the operator
+    result's executionDetails — composite-key safe because the participant
+    already carries its own profileId.
+    """
     try:
         payload = await request.json()
-        log.info("POST /webhook/cintel json payload: %s", payload)
     except Exception:
         raw = await request.body()
-        log.info("POST /webhook/cintel non-json body (%d bytes): %r", len(raw), raw[:4000])
+        log.warning("cintel: non-json body (%d bytes): %r", len(raw), raw[:2000])
+        return PlainTextResponse("", status_code=204)
+
+    conversation_id = payload.get("conversationId")
+    operator_results = payload.get("operatorResults") or []
+    log.info(
+        "cintel: conversationId=%s operatorResults=%d",
+        conversation_id, len(operator_results),
+    )
+    if not conversation_id or not operator_results:
+        return PlainTextResponse("", status_code=204)
+
+    for r in operator_results:
+        result_id = r.get("id")
+        op = r.get("operator") or {}
+        op_name = op.get("displayName") or "Operator"
+        output_format = r.get("outputFormat")
+        result = r.get("result") or {}
+        occurred_at = r.get("dateCreated") or _now_iso()
+        source = f"cintel.{op_name}"
+
+        exec_details = r.get("executionDetails") or {}
+        participants = exec_details.get("participants") or []
+        customer = next((p for p in participants if p.get("type") == "CUSTOMER"), None)
+        profile_id = (customer or {}).get("profileId")
+        if not profile_id:
+            log.warning("cintel: no CUSTOMER profileId; skipping result %s", result_id)
+            continue
+
+        try:
+            if output_format == "TEXT":
+                text = result.get("text")
+                if not text:
+                    log.warning("cintel: %s TEXT result empty; skipping %s", op_name, result_id)
+                    continue
+                await tw.post_conversation_summary(
+                    STORE_ID, profile_id, conversation_id, text, source, occurred_at,
+                )
+                log.info(
+                    "cintel: posted %s summary to profile=%s (%d chars)",
+                    op_name, profile_id, len(text),
+                )
+            elif output_format == "CLASSIFICATION":
+                label = result.get("label")
+                if not label:
+                    log.warning("cintel: %s CLASSIFICATION result empty; skipping %s", op_name, result_id)
+                    continue
+                content = f"{op_name}: {label}"
+                await tw.post_observation(
+                    STORE_ID, profile_id, content, source, occurred_at, conversation_id,
+                )
+                log.info(
+                    "cintel: posted %s observation to profile=%s (%s)",
+                    op_name, profile_id, content,
+                )
+            else:
+                log.warning(
+                    "cintel: unknown outputFormat=%r for operator=%s; skipping %s",
+                    output_format, op_name, result_id,
+                )
+        except tw.TwilioError as e:
+            log.exception("cintel: failed to post %s for profile=%s: %s", op_name, profile_id, e)
+
     return PlainTextResponse("", status_code=204)
 
 
