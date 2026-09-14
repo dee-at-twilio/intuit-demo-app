@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Intuit · Job-scoped SMS demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Field Dispatcher Demo</div>
+  <div class="numbers">
+    <span><em>Tech</em> <code id="hdr-tech">…</code></span>
+    <span><em>AI</em> <code id="hdr-ai">…</code></span>
+    <span><em>Dispatcher</em> <code id="hdr-admin">…</code></span>
+  </div>
+  <button type="button" class="refresh-btn" id="refresh-all" title="Refresh everything">↻ Refresh</button>
+  <div class="live" id="live-dot" title="Last refresh status">●</div>
+</header>
+
+<main class="grid">
+
+  <section class="col tech-col">
+    <div class="col-head">
+      <h2>Technician view <button type="button" class="refresh-btn small" data-refresh title="Refresh">↻</button></h2>
+      <div class="sub">SMS thread on tech's phone (<span id="tech-phone">…</span>)</div>
+    </div>
+    <div class="thread" id="tech-thread"></div>
+    <form class="composer" id="tech-form">
+      <textarea id="tech-input" placeholder="Simulate an SMS from the technician…" rows="2"></textarea>
+      <button type="submit">Send as tech (simulated inbound)</button>
+    </form>
+  </section>
+
+  <section class="col admin-col">
+    <div class="col-head">
+      <h2>Admin / AI view <button type="button" class="refresh-btn small" data-refresh title="Refresh">↻</button></h2>
+      <div class="sub">Full conversation transcript. Admin messages emit from the AI number, prefixed with <code>[<span id="head-persona">…</span>]</code> so the tech sees one SMS thread.</div>
+    </div>
+    <div class="assign">
+      <form id="assign-form">
+        <label>New job for <code id="assign-phone">…</code></label>
+        <div class="row">
+          <input type="text" id="assign-jobid" placeholder="jobID (e.g. 4521)" required />
+          <button type="submit">Assign new job</button>
+        </div>
+      </form>
+    </div>
+    <div class="thread" id="admin-thread"></div>
+    <form class="composer" id="admin-form">
+      <textarea id="admin-input" placeholder="Send a real SMS to the technician as the dispatcher…" rows="2"></textarea>
+      <button type="submit">Send as dispatcher (real SMS from AI number)</button>
+    </form>
+  </section>
+
+  <section class="col profiles-col">
+    <div class="col-head">
+      <h2>Memory profiles <button type="button" class="refresh-btn small" data-refresh title="Refresh">↻</button></h2>
+      <div class="sub">One per (phone, jobID) — composite identity</div>
+    </div>
+    <div id="profiles-list"></div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
