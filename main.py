@@ -575,6 +575,31 @@ async def webhook_probe() -> PlainTextResponse:
     return PlainTextResponse("ok")
 
 
+@app.post("/webhook/cintel")
+async def cintel_webhook(request: Request) -> PlainTextResponse:
+    """CINTEL post-conversation callback receiver. Observation-only for now —
+    logs the payload so we can inspect its shape before wiring up profile writes."""
+    content_type = (request.headers.get("content-type") or "").lower()
+    log.info(
+        "POST /webhook/cintel content-type=%r headers=%s",
+        content_type,
+        dict(request.headers),
+    )
+    try:
+        payload = await request.json()
+        log.info("POST /webhook/cintel json payload: %s", payload)
+    except Exception:
+        raw = await request.body()
+        log.info("POST /webhook/cintel non-json body (%d bytes): %r", len(raw), raw[:4000])
+    return PlainTextResponse("", status_code=204)
+
+
+@app.get("/webhook/cintel")
+async def cintel_webhook_probe() -> PlainTextResponse:
+    log.info("GET /webhook/cintel (probe)")
+    return PlainTextResponse("ok")
+
+
 async def _handle_inbound(conversation_id: str, text: str, simulated: bool) -> dict:
     """Shared: record inbound tech message, generate AI reply, send it back."""
     log.info("_handle_inbound conversationId=%s simulated=%s text=%r", conversation_id, simulated, text[:200])

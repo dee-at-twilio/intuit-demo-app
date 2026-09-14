@@ -317,10 +317,23 @@ body {
   font-weight: 500;
 }
 .status.active { background: var(--dusty-blue-soft); color: var(--dusty-blue); }
-.status.inactive,
 .status.paused { background: var(--ochre-soft); color: var(--ochre); }
-.status.closed,
 .status.completed { background: var(--bg-alt); color: var(--completed); }
+
+.conv-state {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.conv-state.active { background: var(--dusty-blue-soft); color: var(--dusty-blue); }
+.conv-state.inactive { background: var(--ochre-soft); color: var(--ochre); }
+.conv-state.closed { background: var(--bg-alt); color: var(--completed); }
 
 .profile-card .meta {
   font-family: var(--font-mono);

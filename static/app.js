@@ -115,22 +115,22 @@ function renderProfiles(s) {
     jobid.className = 'jobid';
     jobid.textContent = `job ${p.jobID || '?'}`;
     const status = document.createElement('div');
-    const convStatus = p.conversationStatus;
-    const pillClass = convStatus ? convStatus.toLowerCase() : (p.status || 'completed');
-    const pillLabel = convStatus || (p.status ? p.status.toUpperCase() : '—');
-    status.className = `status ${pillClass}`;
-    status.textContent = pillLabel;
+    status.className = `status ${p.status || 'completed'}`;
+    status.textContent = p.status || '—';
     top.appendChild(jobid);
     top.appendChild(status);
 
     const meta = document.createElement('div');
     meta.className = 'meta';
+    const convBadge = p.conversationStatus
+      ? `<span class="conv-state ${p.conversationStatus.toLowerCase()}">${p.conversationStatus}</span>`
+      : '';
     meta.innerHTML = `
       <div>started ${fmtRelative(p.startedAt)}</div>
       <div>last active ${fmtRelative(p.lastActiveAt)}</div>
       ${p.completedAt ? `<div>completed ${fmtRelative(p.completedAt)}</div>` : ''}
       <div class="idrow"><span class="idlabel">profile</span> <code class="idval">${p.id}</code></div>
-      <div class="idrow"><span class="idlabel">conv</span> <code class="idval">${p.conversationId || '—'}</code></div>
+      <div class="idrow"><span class="idlabel">conv</span> <code class="idval">${p.conversationId || '—'}</code> ${convBadge}</div>
     `;
 
     const actions = document.createElement('div');
