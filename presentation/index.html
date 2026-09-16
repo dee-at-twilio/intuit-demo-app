@@ -97,7 +97,7 @@
 
   h1 { font-family: var(--font-h); font-size: 40px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; line-height: 1.15; }
   h2 { font-family: var(--font-h); font-size: 32px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 10px; line-height: 1.2; }
-  .lede { color: var(--text-dim); font-size: 16px; max-width: 640px; margin-bottom: 30px; }
+  .lede { color: var(--text-dim); font-size: 16px;  margin-bottom: 30px; }
 
   .diagram-panel {
     background: var(--bg-alt); border: 1px dotted var(--line); border-radius: 6px;
@@ -458,7 +458,7 @@
 
       <div class="diagram-panel">
         <div class="diagram-label">Runtime flow · composite (phone, jobID) key</div>
-        <svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1300 520" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" fill="#4E7089"/>
@@ -476,6 +476,7 @@
             .c-active { fill: rgba(78,112,137,0.14); stroke: #4E7089; stroke-width: 1.4; }
             .c-paused { fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
             .c-done   { fill: rgba(122,106,158,0.10); stroke: #7A6A9E; stroke-width: 1; }
+            .c-conv   { fill: #FDFAF3; stroke: rgba(43,36,30,0.32); stroke-width: 1; stroke-dasharray: 4 3; }
             .flow { stroke: #4E7089; stroke-width: 1.8; fill: none; }
           </style>
 
@@ -496,30 +497,30 @@
           <line class="flow" x1="390" y1="50" x2="440" y2="50" marker-end="url(#arr3)"/>
 
           <!-- store -->
-          <rect class="c-store" x="60" y="110" width="780" height="380" rx="6"/>
+          <rect class="c-store" x="60" y="110" width="740" height="380" rx="6"/>
           <text class="u-h" x="80" y="134">Twilio Memory Store</text>
           <text class="u-s" x="80" y="150">matchingRules: phone AND jobID · enforceUnique: false</text>
 
           <!-- profile active -->
-          <rect class="c-active" x="80" y="170" width="740" height="96" rx="4"/>
+          <rect class="c-active" x="80" y="170" width="700" height="96" rx="4"/>
           <text class="u-h" x="94" y="192">Profile (phone, jobID = 4521)</text>
-          <text class="u-a" x="800" y="192" text-anchor="end">● active</text>
+          <text class="u-a" x="760" y="192" text-anchor="end">● active</text>
           <text class="u-b" x="94" y="212">Conversation A · open</text>
           <text class="u-m" x="94" y="230">observations: 6 · summaries: 0 (in-flight)</text>
           <text class="u-s" x="94" y="248">participants carry profileId — CINTEL routes summaries here automatically on close</text>
 
           <!-- profile paused -->
-          <rect class="c-paused" x="80" y="280" width="740" height="82" rx="4"/>
+          <rect class="c-paused" x="80" y="280" width="700" height="82" rx="4"/>
           <text class="u-h" x="94" y="302">Profile (phone, jobID = 4522)</text>
-          <text class="u-a" x="800" y="302" text-anchor="end" fill="#A87A21">● paused</text>
+          <text class="u-a" x="760" y="302" text-anchor="end" fill="#A87A21">● paused</text>
           <text class="u-b" x="94" y="322">Conversation B · INACTIVE</text>
           <text class="u-m" x="94" y="340">observations: 3 · summaries: 0</text>
           <text class="u-s" x="94" y="356">a single trait flip resumes it — no app-side state to reconcile</text>
 
           <!-- profile completed / reactivated -->
-          <rect class="c-done" x="80" y="378" width="740" height="102" rx="4"/>
+          <rect class="c-done" x="80" y="378" width="700" height="102" rx="4"/>
           <text class="u-h" x="94" y="400">Profile (phone, jobID = 4520)</text>
-          <text class="u-a" x="800" y="400" text-anchor="end" fill="#7A6A9E">● completed / reactivatable</text>
+          <text class="u-a" x="760" y="400" text-anchor="end" fill="#7A6A9E">● completed / reactivatable</text>
           <text class="u-b" x="94" y="420">Conversations C, D · closed</text>
           <text class="u-m" x="94" y="438">observations: 11 · summaries: 2</text>
           <text class="u-s" x="94" y="456">Reactivate → fresh Conversation E on the same profile.</text>
@@ -527,10 +528,33 @@
 
           <!-- router → store arrow -->
           <path class="flow" d="M570 76 L570 96 L450 96 L450 110" marker-end="url(#arr3)"/>
+
+          <!-- Twilio Conversations column -->
+          <text class="u-h" x="860" y="134">Twilio Conversations</text>
+          <text class="u-s" x="860" y="150">the SMS threads themselves — one profile can point at several</text>
+
+          <!-- conversation A, linked to active profile -->
+          <rect class="c-conv" x="880" y="194" width="360" height="48" rx="4"/>
+          <text class="u-h" x="896" y="214">Conversation A</text>
+          <text class="u-m" x="896" y="231">open · 6 observations</text>
+          <path class="flow" d="M780 218 L880 218" marker-end="url(#arr3)"/>
+
+          <!-- conversation B, linked to paused profile -->
+          <rect class="c-conv" x="880" y="299" width="360" height="44" rx="4"/>
+          <text class="u-h" x="896" y="317">Conversation B</text>
+          <text class="u-m" x="896" y="333">inactive · 3 observations</text>
+          <path class="flow" d="M780 321 L880 321" marker-end="url(#arr3)"/>
+
+          <!-- conversations C & D, linked to completed profile -->
+          <rect class="c-conv" x="880" y="384" width="360" height="76" rx="4"/>
+          <text class="u-h" x="896" y="406">Conversations C, D</text>
+          <text class="u-m" x="896" y="423">closed · 11 observations, 2 summaries</text>
+          <text class="u-s" x="896" y="443">reactivate → fresh Conversation E, same profile</text>
+          <path class="flow" d="M780 429 L880 429" marker-end="url(#arr3)"/>
         </svg>
       </div>
       <p class="diagram-caption">
-        One system. One lookup. Job identity, memory, and conversation lineage all live on the
+        One system. Job identity, memory, and conversation lineage all live on the
         same profile — Twilio holds them together.
       </p>
     </div>
@@ -567,7 +591,7 @@
           <div class="p-title">Conversation job states per technician</div>
           <div class="p-desc">
             One active job, others inactive, historical ones completed — all coexist for the same
-            phone. The router picks the active job by a single trait check: <code>Job.conversation_ID/code> and
+            phone. The router picks the active job by a single trait check: <code>Job.conversation_ID</code> and
             <code>Job.status = active</code>.
           </div>
         </div>
@@ -597,15 +621,194 @@
   </section>
 
   <!-- ============================================================ -->
+  <!-- SLIDE — Sequence diagrams · Assign new job                    -->
+  <!-- ============================================================ -->
+  <section class="slide" data-menu="Assign new job" data-menu-group="Sequence diagrams">
+    <div class="slide-inner">
+      <div class="eyebrow dusty">Sequence · Assign new job</div>
+      <h1>Assign new job</h1>
+      <p class="lede">
+        The app resolves — or creates — the <em style="font-style: italic;">(phone, jobID)</em> profile,
+        mints a new Conversation v1 <code>channel</code>, wires the profile trait to the conversation, and greets the tech.
+        Every routing decision that follows reads Twilio state.
+      </p>
+
+      <div class="diagram-panel">
+        <div class="diagram-label">POST /api/assign-job · runtime call graph</div>
+        <svg viewBox="0 0 1300 900" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="sq-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#4E7089"/>
+            </marker>
+            <marker id="sq-arr-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6C5F51"/>
+            </marker>
+            <marker id="sq-arr-sms" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#B5502E"/>
+            </marker>
+          </defs>
+          <style>
+            .sq-h  { font-family: 'Fraunces', serif; font-size: 13.5px; fill: #2B241E; font-weight: 600; }
+            .sq-sub{ font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #A89A87; }
+            .sq-m  { font-family: 'IBM Plex Mono', monospace; font-size: 11px; fill: #2B241E; }
+            .sq-s  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #6C5F51; }
+            .sq-lbl{ font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; fill: #2B241E; }
+            .sq-n  { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6C5F51; font-style: italic; }
+            .sq-actor { fill: #FDFAF3; stroke: #4E7089; stroke-width: 1.4; }
+            .sq-actor-alt { fill: rgba(78,112,137,0.10); stroke: #4E7089; stroke-width: 1.2; }
+            .sq-life { stroke: rgba(43,36,30,0.30); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+            .sq-req { stroke: #4E7089; stroke-width: 1.6; fill: none; }
+            .sq-resp{ stroke: #6C5F51; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+            .sq-sms { stroke: #B5502E; stroke-width: 1.8; fill: none; }
+            .sq-note{ fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
+            .sq-note-t { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6C5F51; }
+          </style>
+
+          <!-- ============ Actor headers ============ -->
+          <!-- Admin UI -->
+          <rect class="sq-actor" x="30" y="20" width="140" height="52" rx="4"/>
+          <text class="sq-h" x="100" y="42" text-anchor="middle">Admin UI</text>
+          <text class="sq-sub" x="100" y="60" text-anchor="middle">middle column</text>
+
+          <!-- FastAPI app -->
+          <rect class="sq-actor" x="220" y="20" width="150" height="52" rx="4"/>
+          <text class="sq-h" x="295" y="42" text-anchor="middle">App</text>
+          <text class="sq-sub" x="295" y="60" text-anchor="middle">main.py · router</text>
+
+          <!-- Twilio Memory -->
+          <rect class="sq-actor-alt" x="420" y="20" width="160" height="52" rx="4"/>
+          <text class="sq-h" x="500" y="42" text-anchor="middle">Twilio Memory</text>
+          <text class="sq-sub" x="500" y="60" text-anchor="middle">v1 · composite (phone,jobID)</text>
+
+          <!-- Conversations v1 -->
+          <rect class="sq-actor-alt" x="630" y="20" width="150" height="52" rx="4"/>
+          <text class="sq-h" x="705" y="42" text-anchor="middle">Conversations v1</text>
+          <text class="sq-sub" x="705" y="60" text-anchor="middle">classic · channelId mint</text>
+
+          <!-- Orchestrator v2 -->
+          <rect class="sq-actor-alt" x="830" y="20" width="180" height="52" rx="4"/>
+          <text class="sq-h" x="920" y="42" text-anchor="middle">Orchestrator (v2)</text>
+          <text class="sq-sub" x="920" y="60" text-anchor="middle">Conversations v2</text>
+
+          <!-- Tech phone -->
+          <rect class="sq-actor" x="1060" y="20" width="210" height="52" rx="4"/>
+          <text class="sq-h" x="1165" y="42" text-anchor="middle">Tech phone (SMS)</text>
+          <text class="sq-sub" x="1165" y="60" text-anchor="middle">+44 7… · real handset</text>
+
+          <!-- ============ Lifelines ============ -->
+          <line class="sq-life" x1="100"  y1="72" x2="100"  y2="860"/>
+          <line class="sq-life" x1="295"  y1="72" x2="295"  y2="860"/>
+          <line class="sq-life" x1="500"  y1="72" x2="500"  y2="860"/>
+          <line class="sq-life" x1="705"  y1="72" x2="705"  y2="860"/>
+          <line class="sq-life" x1="920"  y1="72" x2="920"  y2="860"/>
+          <line class="sq-life" x1="1165" y1="72" x2="1165" y2="860"/>
+
+          <!-- ============ 1. UI → App ============ -->
+          <line class="sq-req" x1="100" y1="102" x2="295" y2="102" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="120" y="97">① POST /api/assign-job</text>
+          <text class="sq-m"   x="120" y="115">{ jobID: "4521" }</text>
+
+          <!-- ============ 2. App → Memory: lookup by phone ============ -->
+          <line class="sq-req" x1="295" y1="152" x2="500" y2="152" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="147">② POST /Profiles/Lookup</text>
+          <text class="sq-m"   x="308" y="165">{ idType: "phone", value: TECH_PHONE }</text>
+
+          <!-- 3. Memory → App: profiles[] -->
+          <line class="sq-resp" x1="500" y1="192" x2="295" y2="192" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="187">profiles[] — every (phone, jobID) profile for this tech</text>
+
+          <!-- Note: find_active_profile — scan traits for Job.status=='active' -->
+          <rect class="sq-note" x="220" y="208" width="360" height="42" rx="3"/>
+          <text class="sq-note-t" x="232" y="225">find_active_profile: for each pid, GET profile, check</text>
+          <text class="sq-note-t" x="232" y="240">Job.status. If any is <tspan style="font-family:'IBM Plex Mono',monospace">active</tspan> → return 409 to the UI.</text>
+
+          <!-- ============ 4. App → Memory: create/resolve composite profile ============ -->
+          <line class="sq-req" x1="295" y1="278" x2="500" y2="278" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="273">③ POST /Stores/{store}/Profiles</text>
+          <text class="sq-m"   x="308" y="291">Contact: { phone, jobID }, Job: { status:"active", startedAt }</text>
+          <text class="sq-s"   x="308" y="306">matchingRules "phone AND jobID" → resolve if exists, else create</text>
+
+          <!-- 5. Memory → App: profile{id} -->
+          <line class="sq-resp" x1="500" y1="326" x2="295" y2="326" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="321">{ id: mem_profile_… }</text>
+
+          <!-- ============ 6. App → Memory: PATCH Job traits ============ -->
+          <line class="sq-req" x1="295" y1="358" x2="500" y2="358" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="353">④ PATCH /Profiles/{id}</text>
+          <text class="sq-m"   x="308" y="371">Job: { status:"active", lastActiveAt }</text>
+
+          <!-- 7. GET /Profiles/{id} — check for existing conversationId (resume case) -->
+          <line class="sq-req" x1="295" y1="400" x2="500" y2="400" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="395">⑤ GET /Profiles/{id}</text>
+          <text class="sq-s"   x="308" y="413">does Job.conversationId already exist? (resume path)</text>
+          <line class="sq-resp" x1="500" y1="431" x2="295" y2="431" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="426">profile.traits → no conversationId (new-job path)</text>
+
+          <!-- ============ 8. App → Conv v1: mint channelId ============ -->
+          <line class="sq-req" x1="295" y1="462" x2="705" y2="462" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="457">⑥ POST /v1/Services/{svc}/Conversations</text>
+          <text class="sq-s"   x="308" y="475">classic Conversation used purely to mint a fresh CH- SID</text>
+
+          <!-- 9. Conv v1 → App: {sid: CH...} -->
+          <line class="sq-resp" x1="705" y1="497" x2="295" y2="497" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="492">channelId = "CH…"</text>
+
+          <!-- ============ 10. App → Orchestrator: create conversation ============ -->
+          <line class="sq-req" x1="295" y1="530" x2="920" y2="530" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="525">⑦ POST /v2/Conversations</text>
+          <text class="sq-m"   x="308" y="543">configurationId, participants:</text>
+          <text class="sq-m"   x="322" y="558">CUSTOMER · profileId=(phone,jobID) · address=TECH_PHONE · channelId</text>
+          <text class="sq-m"   x="322" y="573">AI_AGENT · profileId=AI · address=AI_NUMBER · channelId</text>
+
+          <!-- 11. Orchestrator → App: conversation -->
+          <line class="sq-resp" x1="920" y1="595" x2="295" y2="595" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="590">conversation { id, participants[…] }</text>
+
+          <!-- ============ 12. App → Memory: PATCH conversationId + channelId onto profile ============ -->
+          <line class="sq-req" x1="295" y1="626" x2="500" y2="626" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="621">⑧ PATCH /Profiles/{id}</text>
+          <text class="sq-m"   x="308" y="639">Job: { conversationId, channelId }</text>
+          <text class="sq-s"   x="308" y="654">the trait that makes the router work — one Twilio read from here on</text>
+
+          <!-- ============ 13. App → Orchestrator: send welcome via /Actions ============ -->
+          <line class="sq-req" x1="295" y1="686" x2="920" y2="686" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="681">⑨ POST /v2/Conversations/{id}/Actions</text>
+          <text class="sq-m"   x="308" y="699">type: SEND_MESSAGE · from: AI_NUMBER · to: TECH_PHONE</text>
+          <text class="sq-m"   x="308" y="714">body: "[Dispatcher] Hi Tech, you've been assigned job 4521…"</text>
+
+          <!-- 14. Orchestrator → Tech phone: real SMS -->
+          <line class="sq-sms" x1="920" y1="738" x2="1165" y2="738" marker-end="url(#sq-arr-sms)"/>
+          <text class="sq-lbl" x="932" y="733" fill="#B5502E">⑩ SMS delivered</text>
+          <text class="sq-s"   x="932" y="751">carrier-side; real handset lights up</text>
+
+          <!-- ============ 15. App → Orchestrator: record outbound communication ============ -->
+          <line class="sq-req" x1="295" y1="782" x2="920" y2="782" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="777">⑪ POST /v2/Conversations/{id}/Communications</text>
+          <text class="sq-s"   x="308" y="795">bookkeep the outbound so the transcript shows it (Actions doesn't auto-record)</text>
+
+          <!-- ============ 16. App → UI: ack ============ -->
+          <line class="sq-resp" x1="295" y1="828" x2="100" y2="828" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-lbl" x="120" y="823">⑫ 200 OK</text>
+          <text class="sq-m"   x="120" y="843">{ profileId, conversationId, resumed:false }</text>
+        </svg>
+      </div>
+      <p class="diagram-caption">
+        Ten Twilio calls, one welcome SMS, zero application-side tables. The profile trait
+        <span style="font-family:var(--font-m);font-size:12px">Job.conversationId</span> is what makes
+        the next inbound SMS route in a single lookup.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
   <!-- SLIDE 5 — Differentiation · Bringing it home                  -->
   <!-- ============================================================ -->
   <section class="slide" data-menu="Bringing it home" data-menu-group="Differentiation">
     <div class="slide-inner">
       <div class="eyebrow violet">Differentiation</div>
-      <h1>The composite-key feature moves job identity from the app into Twilio.</h1>
+      <h1>Composite-key brings identity into Twilio.</h1>
       <p class="lede">
-        Same use case, same channels, same LLM. What changes is where the state of truth
-        lives — and every downstream cost follows from that single choice.
+        State of truth lives in Twilio Memory.
       </p>
 
       <div class="compare">
@@ -613,14 +816,14 @@
           <h3>Without composite keys</h3>
           <div class="sub">GA Memory · one profile per phone</div>
           <ul>
-            <li><strong>State of truth:</strong> your DB.</li>
+            <li><strong>State of truth:</strong> your DB — <code>jobs</code>, <code>active_job_for_phone</code>,
+              <code>job_conversation_map</code>.</li>
             <li><strong>Router:</strong> DB call + Twilio call, per message.</li>
-            <li><strong>Twilio Memory:</strong> holds technician info; nearly redundant.</li>
-            <li><strong>Job scoping:</strong> app-owned tags &amp; filters.</li>
+            <li><strong>Twilio Memory:</strong> at risk of going unused — per-job writes pool into one profile.</li>
+            <li><strong>Job scoping:</strong> app-owned tags &amp; filters, if teams bother writing to Memory at all.</li>
             <li><strong>Job history:</strong> a multi-system join.</li>
-            <li><strong>CINTEL summary:</strong> lands on a shared profile; app must attribute.</li>
+            <li><strong>CINTEL summary:</strong> bypasses Memory — handler looks up <code>job_id</code>, saves to app DB.</li>
             <li><strong>Deletion:</strong> row-by-row across two systems.</li>
-            <li><strong>New job behavior:</strong> new tables, tests, sync logic.</li>
           </ul>
         </div>
         <div class="compare-col with">
@@ -634,14 +837,13 @@
             <li><strong>Job history:</strong> one unscoped <code>Recall</code>.</li>
             <li><strong>CINTEL summary:</strong> lands on the right profile automatically.</li>
             <li><strong>Deletion:</strong> drop the profile.</li>
-            <li><strong>New job behavior:</strong> new traits, no schema migration.</li>
           </ul>
         </div>
       </div>
 
       <p class="kicker">
         The gated feature isn't a convenience — it's the difference between
-        <em>Twilio holds the state</em> and <em>the app holds the state, and Twilio helps</em>.
+        <em>Memory going unused</em> and <em>Memory doing the work for you</em>.
         For a multi-job-per-phone workflow, that's the whole architecture.
       </p>
     </div>
