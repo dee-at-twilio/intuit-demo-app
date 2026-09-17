@@ -207,6 +207,78 @@
       page-break-after: always;
     }
   }
+
+  /* ==================================================================
+     UML Sequence Diagram — reusable template.
+     Change any value in this block and the whole diagram updates.
+     Wrap a `<svg class="uml-sequence">` around your diagram markup
+     and use the class names below on each element.
+     ================================================================== */
+  .uml-sequence {
+    /* fonts */
+    --uml-font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --uml-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* colors — override any to re-skin */
+    --uml-bg:              #FFFFFF;
+    --uml-actor-fill:      #FDD35C;
+    --uml-actor-border:    #E8A62A;
+    --uml-actor-label:     #D9482E;
+    --uml-subtext:         #8B7A5A;
+    --uml-arrow:           #E88030;
+    --uml-arrow-sms:       #D9482E;
+    --uml-lifeline:        #E88030;
+    --uml-activation-fill: #F0EFEA;
+    --uml-activation-line: #B8B0A0;
+    --uml-msg-label:       #2B241E;
+    --uml-msg-body:        #4E4033;
+    --uml-note-fill:       #FFF6DC;
+    --uml-note-border:     #E8A62A;
+    --uml-note-text:       #4E4033;
+    --uml-alt-border:      #6BA4E7;
+    --uml-alt-tab-fill:    #EEF3F9;
+    --uml-alt-label:       #4E4033;
+    --uml-alt-guard:       #4A6B85;
+
+    /* type sizes */
+    --uml-size-actor:     15px;
+    --uml-size-sub:       11px;
+    --uml-size-label:     13.5px;
+    --uml-size-body:      11.5px;
+    --uml-size-note:      12px;
+    --uml-size-sms:       13.5px;
+    --uml-size-alt-label: 11px;
+    --uml-size-alt-guard: 12px;
+
+    /* line weights */
+    --uml-stroke-req:  1.8;
+    --uml-stroke-resp: 1.4;
+    --uml-stroke-sms:  2;
+    --uml-stroke-life: 1;
+    --uml-lifeline-dash: 5 5;
+    --uml-resp-dash:     7 4;
+  }
+  .uml-sequence .uml-bg           { fill: var(--uml-bg); }
+  .uml-sequence .uml-actor-pill   { fill: var(--uml-actor-fill); stroke: var(--uml-actor-border); stroke-width: 1.5; }
+  .uml-sequence .uml-actor-label  { font-family: var(--uml-font); font-size: var(--uml-size-actor); font-weight: 500; fill: var(--uml-actor-label); letter-spacing: -0.005em; }
+  .uml-sequence .uml-actor-sub    { font-family: var(--uml-font); font-size: var(--uml-size-sub); fill: var(--uml-subtext); }
+  .uml-sequence .uml-connector    { stroke: var(--uml-arrow); stroke-width: 1.5; fill: none; }
+  .uml-sequence .uml-lifeline     { stroke: var(--uml-lifeline); stroke-width: var(--uml-stroke-life); stroke-dasharray: var(--uml-lifeline-dash); opacity: 0.65; fill: none; }
+  .uml-sequence .uml-activation   { fill: var(--uml-activation-fill); stroke: var(--uml-activation-line); stroke-width: 1; }
+  .uml-sequence .uml-req          { stroke: var(--uml-arrow); stroke-width: var(--uml-stroke-req); fill: none; color: var(--uml-arrow); }
+  .uml-sequence .uml-resp         { stroke: var(--uml-arrow); stroke-width: var(--uml-stroke-resp); fill: none; stroke-dasharray: var(--uml-resp-dash); color: var(--uml-arrow); }
+  .uml-sequence .uml-sms          { stroke: var(--uml-arrow-sms); stroke-width: var(--uml-stroke-sms); fill: none; color: var(--uml-arrow-sms); }
+  .uml-sequence .uml-arrowhead    { fill: currentColor; }
+  .uml-sequence .uml-msg-label    { font-family: var(--uml-font); font-size: var(--uml-size-label); font-weight: 600; fill: var(--uml-msg-label); }
+  .uml-sequence .uml-msg-body     { font-family: var(--uml-font-mono); font-size: var(--uml-size-body); fill: var(--uml-msg-body); }
+  .uml-sequence .uml-msg-note     { font-family: var(--uml-font); font-size: var(--uml-size-note); fill: var(--uml-subtext); font-style: italic; }
+  .uml-sequence .uml-sms-label    { font-family: var(--uml-font); font-size: var(--uml-size-sms); font-weight: 600; fill: var(--uml-arrow-sms); }
+  .uml-sequence .uml-note-box     { fill: var(--uml-note-fill); stroke: var(--uml-note-border); stroke-width: 1; stroke-dasharray: 4 3; }
+  .uml-sequence .uml-note-text    { font-family: var(--uml-font); font-size: var(--uml-size-note); fill: var(--uml-note-text); }
+  .uml-sequence .uml-alt-frame    { fill: none; stroke: var(--uml-alt-border); stroke-width: 1.5; }
+  .uml-sequence .uml-alt-tab      { fill: var(--uml-alt-tab-fill); stroke: var(--uml-alt-border); stroke-width: 1.5; }
+  .uml-sequence .uml-alt-label    { font-family: var(--uml-font); font-size: var(--uml-size-alt-label); font-weight: 600; fill: var(--uml-alt-label); letter-spacing: 0.04em; text-transform: uppercase; }
+  .uml-sequence .uml-alt-guard    { font-family: var(--uml-font); font-size: var(--uml-size-alt-guard); fill: var(--uml-alt-guard); font-style: italic; }
 </style>
 </head>
 <body class="menu-open">
@@ -633,151 +705,152 @@
         one PATCH mutates. Every routing decision that follows reads Twilio state.
       </p>
 
-      <div class="diagram-panel">
+      <div class="diagram-panel uml">
         <div class="diagram-label">POST /api/assign-job · runtime call graph</div>
-        <svg viewBox="0 0 1300 960" xmlns="http://www.w3.org/2000/svg">
+        <svg class="uml-sequence" viewBox="0 0 1300 1040" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <marker id="sq-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#4E7089"/>
-            </marker>
-            <marker id="sq-arr-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#6C5F51"/>
-            </marker>
-            <marker id="sq-arr-sms" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#B5502E"/>
+            <marker id="uml-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="uml-arrowhead" d="M0,0 L10,5 L0,10 z"/>
             </marker>
           </defs>
-          <style>
-            .sq-h  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 15px; fill: #1F1912; font-weight: 700; letter-spacing: -0.005em; }
-            .sq-sub{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 11.5px; fill: #6C5F51; font-weight: 500; }
-            .sq-m  { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace; font-size: 12.5px; fill: #2B241E; }
-            .sq-s  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #4E4033; font-style: italic; }
-            .sq-lbl{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13.5px; fill: #1F1912; font-weight: 700; letter-spacing: -0.005em; }
-            .sq-n  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #4E4033; font-style: italic; }
-            .sq-actor { fill: #FDFAF3; stroke: #4E7089; stroke-width: 1.4; }
-            .sq-actor-alt { fill: rgba(78,112,137,0.10); stroke: #4E7089; stroke-width: 1.2; }
-            .sq-life { stroke: rgba(43,36,30,0.30); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
-            .sq-req { stroke: #4E7089; stroke-width: 1.6; fill: none; }
-            .sq-resp{ stroke: #6C5F51; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
-            .sq-sms { stroke: #B5502E; stroke-width: 1.8; fill: none; }
-            .sq-note{ fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
-            .sq-note-t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12.5px; fill: #4E4033; }
-          </style>
 
-          <!-- ============ Actor headers ============ -->
-          <!-- Admin UI -->
-          <rect class="sq-actor" x="30" y="20" width="140" height="52" rx="4"/>
-          <text class="sq-h" x="100" y="42" text-anchor="middle">Admin UI</text>
-          <text class="sq-sub" x="100" y="60" text-anchor="middle">middle column</text>
+          <!-- White background -->
+          <rect class="uml-bg" x="0" y="0" width="1300" height="1040"/>
 
-          <!-- FastAPI app -->
-          <rect class="sq-actor" x="220" y="20" width="150" height="52" rx="4"/>
-          <text class="sq-h" x="295" y="42" text-anchor="middle">App</text>
-          <text class="sq-sub" x="295" y="60" text-anchor="middle">main.py · router</text>
+          <!-- Top connector line between pills -->
+          <line class="uml-connector" x1="100" y1="42" x2="1165" y2="42"/>
 
-          <!-- Twilio Memory -->
-          <rect class="sq-actor-alt" x="420" y="20" width="160" height="52" rx="4"/>
-          <text class="sq-h" x="500" y="42" text-anchor="middle">Twilio Memory</text>
-          <text class="sq-sub" x="500" y="60" text-anchor="middle">v1 · composite (phone,jobID)</text>
+          <!-- ============ Actor pills ============ -->
+          <rect class="uml-actor-pill" x="30"   y="20" width="140" height="44" rx="22"/>
+          <text class="uml-actor-label" x="100"  y="43" text-anchor="middle" dominant-baseline="middle">Admin UI</text>
+          <text class="uml-actor-sub"   x="100"  y="82" text-anchor="middle">Dispatcher column</text>
 
-          <!-- Conversations v1 -->
-          <rect class="sq-actor-alt" x="630" y="20" width="150" height="52" rx="4"/>
-          <text class="sq-h" x="705" y="42" text-anchor="middle">Conversations v1</text>
-          <text class="sq-sub" x="705" y="60" text-anchor="middle">classic · channelId mint</text>
+          <rect class="uml-actor-pill" x="220"  y="20" width="150" height="44" rx="22"/>
+          <text class="uml-actor-label" x="295"  y="43" text-anchor="middle" dominant-baseline="middle">App</text>
+          <text class="uml-actor-sub"   x="295"  y="82" text-anchor="middle">Router</text>
 
-          <!-- Orchestrator v2 -->
-          <rect class="sq-actor-alt" x="830" y="20" width="180" height="52" rx="4"/>
-          <text class="sq-h" x="920" y="42" text-anchor="middle">Orchestrator (v2)</text>
-          <text class="sq-sub" x="920" y="60" text-anchor="middle">Conversations v2</text>
+          <rect class="uml-actor-pill" x="420"  y="20" width="160" height="44" rx="22"/>
+          <text class="uml-actor-label" x="500"  y="43" text-anchor="middle" dominant-baseline="middle">Twilio Memory</text>
+          <text class="uml-actor-sub"   x="500"  y="82" text-anchor="middle">composite (phone, jobID)</text>
 
-          <!-- Tech phone -->
-          <rect class="sq-actor" x="1060" y="20" width="210" height="52" rx="4"/>
-          <text class="sq-h" x="1165" y="42" text-anchor="middle">Tech phone (SMS)</text>
-          <text class="sq-sub" x="1165" y="60" text-anchor="middle">+44 7… · real handset</text>
+          <rect class="uml-actor-pill" x="630"  y="20" width="150" height="44" rx="22"/>
+          <text class="uml-actor-label" x="705"  y="43" text-anchor="middle" dominant-baseline="middle">Conv v1</text>
+          <text class="uml-actor-sub"   x="705"  y="82" text-anchor="middle">classic · channelId workaround</text>
+
+          <rect class="uml-actor-pill" x="830"  y="20" width="180" height="44" rx="22"/>
+          <text class="uml-actor-label" x="920"  y="43" text-anchor="middle" dominant-baseline="middle">Orchestrator (v2)</text>
+          <text class="uml-actor-sub"   x="920"  y="82" text-anchor="middle">Conversations v2</text>
+
+          <rect class="uml-actor-pill" x="1060" y="20" width="210" height="44" rx="22"/>
+          <text class="uml-actor-label" x="1165" y="43" text-anchor="middle" dominant-baseline="middle">Tech phone (SMS)</text>
+          <text class="uml-actor-sub"   x="1165" y="82" text-anchor="middle">+44 7… · real handset</text>
 
           <!-- ============ Lifelines ============ -->
-          <line class="sq-life" x1="100"  y1="72" x2="100"  y2="940"/>
-          <line class="sq-life" x1="295"  y1="72" x2="295"  y2="940"/>
-          <line class="sq-life" x1="500"  y1="72" x2="500"  y2="940"/>
-          <line class="sq-life" x1="705"  y1="72" x2="705"  y2="940"/>
-          <line class="sq-life" x1="920"  y1="72" x2="920"  y2="940"/>
-          <line class="sq-life" x1="1165" y1="72" x2="1165" y2="940"/>
+          <line class="uml-lifeline" x1="100"  y1="97" x2="100"  y2="1015"/>
+          <line class="uml-lifeline" x1="295"  y1="97" x2="295"  y2="1015"/>
+          <line class="uml-lifeline" x1="500"  y1="97" x2="500"  y2="1015"/>
+          <line class="uml-lifeline" x1="705"  y1="97" x2="705"  y2="1015"/>
+          <line class="uml-lifeline" x1="920"  y1="97" x2="920"  y2="1015"/>
+          <line class="uml-lifeline" x1="1165" y1="97" x2="1165" y2="1015"/>
 
-          <!-- ============ 1. UI → App ============ -->
-          <line class="sq-req" x1="100" y1="111" x2="295" y2="111" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="120" y="105">① POST /api/assign-job</text>
-          <text class="sq-m"   x="120" y="128">{ jobID: "4521" }</text>
+          <!-- ============ Alt frame around steps ④ + ⑤ (new-conversation branch) ============ -->
+          <rect class="uml-alt-frame" x="265" y="477" width="680" height="228" rx="2"/>
+          <rect class="uml-alt-tab"   x="265" y="477" width="42" height="20"/>
+          <text class="uml-alt-label" x="286" y="491" text-anchor="middle">alt</text>
+          <text class="uml-alt-guard" x="316" y="491">[ no reusable Job.conversationId — create fresh ]</text>
 
-          <!-- ============ 2. App → Memory: lookup by phone ============ -->
-          <line class="sq-req" x1="295" y1="176" x2="500" y2="176" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="170">② POST /Profiles/Lookup</text>
-          <text class="sq-m"   x="308" y="193">{ idType: "phone", value: TECH_PHONE }</text>
+          <!-- ============ Activation boxes on destination lifelines ============ -->
+          <rect class="uml-activation" x="289" y="118" width="12" height="860"/>
+          <rect class="uml-activation" x="494" y="178" width="12" height="60"/>
+          <rect class="uml-activation" x="494" y="368" width="12" height="76"/>
+          <rect class="uml-activation" x="699" y="508" width="12" height="52"/>
+          <rect class="uml-activation" x="914" y="598" width="12" height="86"/>
+          <rect class="uml-activation" x="494" y="733" width="12" height="24"/>
+          <rect class="uml-activation" x="914" y="813" width="12" height="128"/>
+          <rect class="uml-activation" x="1159" y="878" width="12" height="20"/>
+
+          <!-- ============ ① UI → App ============ -->
+          <line class="uml-req" x1="106" y1="125" x2="289" y2="125" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="120" y="118">① POST /api/assign-job</text>
+          <text class="uml-msg-body"  x="120" y="141">{ jobID: "4521" }</text>
+
+          <!-- ============ ② App → Memory: lookup by phone ============ -->
+          <line class="uml-req" x1="301" y1="185" x2="494" y2="185" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="178">② POST /Profiles/Lookup</text>
+          <text class="uml-msg-body"  x="310" y="201">{ idType: "phone", value: TECH_PHONE }</text>
 
           <!-- Memory → App: profiles[] -->
-          <line class="sq-resp" x1="500" y1="228" x2="295" y2="228" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="222">profiles[] — every (phone, jobID) profile for this tech</text>
+          <line class="uml-resp" x1="494" y1="232" x2="301" y2="232" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-note" x="310" y="226">profiles[] — every (phone, jobID) profile for this tech</text>
 
-          <!-- Note: find_active_profile returns the FULL profile — no re-GET on the 409 path -->
-          <rect class="sq-note" x="220" y="249" width="380" height="58" rx="3"/>
-          <text class="sq-note-t" x="232" y="271">find_active_profile: for each pid, GET profile, check</text>
-          <text class="sq-note-t" x="232" y="290">Job.status. If any is <tspan style="font-family:'IBM Plex Mono',monospace">active</tspan> → return the full profile → 409.</text>
+          <!-- Note callout: find_active_profile logic (on App side) -->
+          <rect class="uml-note-box" x="200" y="253" width="410" height="60" rx="3"/>
+          <text class="uml-note-text" x="212" y="274">find_active_profile: iterate returned pids, check Job.status.</text>
+          <text class="uml-note-text" x="212" y="293"> If any <tspan style="font-family:'IBM Plex Mono',monospace">active</tspan> → return the full profile and 409 error.</text>
 
-          <!-- ============ 3. App → Memory: create/resolve composite profile ============ -->
-          <line class="sq-req" x1="295" y1="345" x2="500" y2="345" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="339">③ POST /Stores/{store}/Profiles</text>
-          <text class="sq-m"   x="308" y="362">Contact: { phone, jobID }, Job: { status:"active", startedAt }</text>
-          <text class="sq-s"   x="308" y="380">matchingRules "phone AND jobID" → resolve if exists, else create</text>
+          <!-- ============ ②b App → UI: 409 if active profile exists ============ -->
+          <line class="uml-resp" x1="289" y1="328" x2="106" y2="328" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="120" y="322">②b 409 Conflict</text>
+          <text class="uml-msg-body"  x="120" y="343">{ profileId, active: true }</text>
+
+          <!-- ============ ③ App → Memory: create/resolve composite profile ============ -->
+          <line class="uml-req" x1="301" y1="375" x2="494" y2="375" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="368">③ POST /Stores/{store}/Profiles</text>
+          <text class="uml-msg-body"  x="310" y="391">Contact: { phone, jobID }, Job: { status: "active", startedAt }</text>
+          <text class="uml-msg-note"  x="310" y="409">matchingRules "phone AND jobID" → resolve if exists, else create</text>
+
+
 
           <!-- Memory → App: full profile with traits -->
-          <line class="sq-resp" x1="500" y1="412" x2="295" y2="412" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="405">profile { id, traits.Job } — includes conversationId / channelId if resumed</text>
+          <line class="uml-resp" x1="494" y1="444" x2="301" y2="444" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-note" x="310" y="438">profile { id, traits.Job } — includes conversationId / channelId if resumed</text>
 
-          <!-- ============ 4. App → Conv v1: mint channelId (conditional — skipped on reuse) ============ -->
-          <line class="sq-req" x1="295" y1="470" x2="705" y2="470" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="464">④ POST /v1/Services/{svc}/Conversations</text>
-          <text class="sq-s"   x="308" y="488">only when no reusable Job.conversationId — mints a fresh CH- SID</text>
+          <!-- ============ ④ App → Conv v1: mint channelId (inside alt) ============ -->
+          <line class="uml-req" x1="301" y1="515" x2="699" y2="515" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="508">④ POST /v1/Services/{svc}/Conversations</text>
+          <text class="uml-msg-note"  x="310" y="532">mints a fresh CH- SID as the shared channelId</text>
 
           <!-- Conv v1 → App: {sid: CH...} -->
-          <line class="sq-resp" x1="705" y1="518" x2="295" y2="518" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="511">channelId = "CH…"</text>
+          <line class="uml-resp" x1="699" y1="560" x2="301" y2="560" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-note" x="310" y="554">channelId = "CH…"</text>
 
-          <!-- ============ 5. App → Orchestrator: create conversation ============ -->
-          <line class="sq-req" x1="295" y1="560" x2="920" y2="560" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="554">⑤ POST /v2/Conversations</text>
-          <text class="sq-m"   x="308" y="577">configurationId, participants:</text>
-          <text class="sq-m"   x="322" y="597">CUSTOMER · profileId=(phone,jobID) · address=TECH_PHONE · channelId</text>
-          <text class="sq-m"   x="322" y="616">AI_AGENT · profileId=AI · address=AI_NUMBER · channelId</text>
+          <!-- ============ ⑤ App → Orchestrator: create conversation (inside alt) ============ -->
+          <line class="uml-req" x1="301" y1="605" x2="914" y2="605" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="598">⑤ POST /v2/Conversations</text>
+          <text class="uml-msg-body"  x="310" y="621">configurationId, participants:</text>
+          <text class="uml-msg-body"  x="324" y="639">CUSTOMER · profileId=(phone,jobID) · address=TECH_PHONE · channelId</text>
+          <text class="uml-msg-body"  x="324" y="657">AI_AGENT · profileId=AI · address=AI_NUMBER · channelId</text>
 
           <!-- Orchestrator → App: conversation -->
-          <line class="sq-resp" x1="920" y1="645" x2="295" y2="645" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="638">conversation { id, participants[…] }</text>
+          <line class="uml-resp" x1="914" y1="684" x2="301" y2="684" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-note" x="310" y="678">conversation { id, participants[…] }</text>
 
-          <!-- ============ 6. App → Memory: single combined PATCH ============ -->
-          <line class="sq-req" x1="295" y1="690" x2="500" y2="690" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="684">⑥ PATCH /Profiles/{id}</text>
-          <text class="sq-m"   x="308" y="707">Job: { status:"active", lastActiveAt, conversationId, channelId }</text>
-          <text class="sq-s"   x="308" y="726">one write — status flip + trait wire — the router reads this on every inbound</text>
+          <!-- ============ ⑥ App → Memory: single combined PATCH ============ -->
+          <line class="uml-req" x1="301" y1="740" x2="494" y2="740" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="733">⑥ PATCH /Profiles/{id}</text>
+          <text class="uml-msg-body"  x="310" y="756">Job: { status: "active", lastActiveAt, conversationId, channelId }</text>
+          <text class="uml-msg-note"  x="310" y="774">one write — status flip + trait wire — the router reads this on every inbound</text>
 
-          <!-- ============ 7. App → Orchestrator: send welcome via /Actions ============ -->
-          <line class="sq-req" x1="295" y1="770" x2="920" y2="770" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="764">⑦ POST /v2/Conversations/{id}/Actions</text>
-          <text class="sq-m"   x="308" y="787">type: SEND_MESSAGE · from: AI_NUMBER · to: TECH_PHONE</text>
-          <text class="sq-m"   x="308" y="806">body: "[Dispatcher] Hi Tech, you've been assigned job 4521…"</text>
+          <!-- ============ ⑦ App → Orchestrator: send welcome via /Actions ============ -->
+          <line class="uml-req" x1="301" y1="820" x2="914" y2="820" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="813">⑦ POST /v2/Conversations/{id}/Actions</text>
+          <text class="uml-msg-body"  x="310" y="836">type: SEND_MESSAGE · from: AI_NUMBER · to: TECH_PHONE</text>
+          <text class="uml-msg-body"  x="310" y="854">body: "[Dispatcher] Hi Tech, you've been assigned job 4521…"</text>
 
-          <!-- Orchestrator → Tech phone: real SMS -->
-          <line class="sq-sms" x1="920" y1="838" x2="1165" y2="838" marker-end="url(#sq-arr-sms)"/>
-          <text class="sq-lbl" x="932" y="831" fill="#B5502E">⑧ SMS delivered</text>
-          <text class="sq-s"   x="932" y="855">carrier-side; real handset lights up</text>
+          <!-- ⑧ Orchestrator → Tech phone: real SMS -->
+          <line class="uml-sms" x1="926" y1="885" x2="1159" y2="885" marker-end="url(#uml-arr)"/>
+          <text class="uml-sms-label" x="940" y="879">⑧ SMS delivered</text>
+          <text class="uml-msg-note"  x="940" y="902">carrier-side; real handset lights up</text>
 
-          <!-- ============ 9. App → Orchestrator: record outbound communication ============ -->
-          <line class="sq-req" x1="295" y1="890" x2="920" y2="890" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="884">⑨ POST /v2/Conversations/{id}/Communications</text>
-          <text class="sq-s"   x="308" y="908">bookkeep the outbound so the transcript shows it (Actions doesn't auto-record)</text>
+          <!-- ============ ⑨ App → Orchestrator: record outbound communication ============ -->
+          <line class="uml-req" x1="301" y1="935" x2="914" y2="935" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="310" y="928">⑨ POST /v2/Conversations/{id}/Communications</text>
+          <text class="uml-msg-note"  x="310" y="952">bookkeep the outbound so the transcript shows it (Actions doesn't auto-record)</text>
 
-          <!-- ============ 10. App → UI: ack ============ -->
-          <line class="sq-resp" x1="295" y1="940" x2="100" y2="940" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-lbl" x="120" y="934">⑩ 200 OK</text>
-          <text class="sq-m"   x="120" y="957">{ profileId, conversationId, resumed:false }</text>
+          <!-- ============ ⑩ App → UI: ack ============ -->
+          <line class="uml-resp" x1="289" y1="983" x2="106" y2="983" marker-end="url(#uml-arr)"/>
+          <text class="uml-msg-label" x="120" y="977">⑩ 200 OK</text>
+          <text class="uml-msg-body"  x="120" y="1000">{ profileId, conversationId, resumed: false }</text>
         </svg>
       </div>
       <p class="diagram-caption">
