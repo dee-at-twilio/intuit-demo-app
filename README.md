@@ -89,11 +89,6 @@ Then open `http://localhost:8000` in a browser.
 5. Click a `paused` profile card and hit **Resume** — the current active flips to paused, this one flips to active. Its conversation resumes (or a new one is created if the old one was closed).
 6. Click **Complete job** on an active profile to close its conversation and mark the profile `completed`. Memory extraction fires on close (per your config).
 
-## What the app does not do
-
-- **No dispatch webhook.** In production, Intuit's scheduling system would push job-assignment events to a `/webhooks/dispatch/job-assigned` endpoint that then calls the same code path as the admin's "Assign new job" button. For the demo, the button is the trigger.
-- **No inbound routing on the admin number.** Per your design, the tech only ever texts the AI number.
-- **No local persistence.** Every routing decision reads Twilio Memory. The state of truth is the composite profile + `Job.status` trait. That's the whole point.
 
 ## Files
 
