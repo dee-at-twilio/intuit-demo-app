@@ -629,13 +629,13 @@
       <h1>Assign new job</h1>
       <p class="lede">
         The app resolves — or creates — the <em style="font-style: italic;">(phone, jobID)</em> profile,
-        mints a new Conversation v1 <code>channel</code>, wires the profile trait to the conversation, and greets the tech.
-        Every routing decision that follows reads Twilio state.
+        wires it to a Conversation, and greets the tech. One POST creates or resolves;
+        one PATCH mutates. Every routing decision that follows reads Twilio state.
       </p>
 
       <div class="diagram-panel">
         <div class="diagram-label">POST /api/assign-job · runtime call graph</div>
-        <svg viewBox="0 0 1300 900" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1300 960" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="sq-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" fill="#4E7089"/>
@@ -648,12 +648,12 @@
             </marker>
           </defs>
           <style>
-            .sq-h  { font-family: 'Fraunces', serif; font-size: 13.5px; fill: #2B241E; font-weight: 600; }
-            .sq-sub{ font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #A89A87; }
-            .sq-m  { font-family: 'IBM Plex Mono', monospace; font-size: 11px; fill: #2B241E; }
-            .sq-s  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #6C5F51; }
-            .sq-lbl{ font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; fill: #2B241E; }
-            .sq-n  { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6C5F51; font-style: italic; }
+            .sq-h  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 15px; fill: #1F1912; font-weight: 700; letter-spacing: -0.005em; }
+            .sq-sub{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 11.5px; fill: #6C5F51; font-weight: 500; }
+            .sq-m  { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace; font-size: 12.5px; fill: #2B241E; }
+            .sq-s  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #4E4033; font-style: italic; }
+            .sq-lbl{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13.5px; fill: #1F1912; font-weight: 700; letter-spacing: -0.005em; }
+            .sq-n  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #4E4033; font-style: italic; }
             .sq-actor { fill: #FDFAF3; stroke: #4E7089; stroke-width: 1.4; }
             .sq-actor-alt { fill: rgba(78,112,137,0.10); stroke: #4E7089; stroke-width: 1.2; }
             .sq-life { stroke: rgba(43,36,30,0.30); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
@@ -661,7 +661,7 @@
             .sq-resp{ stroke: #6C5F51; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
             .sq-sms { stroke: #B5502E; stroke-width: 1.8; fill: none; }
             .sq-note{ fill: rgba(168,122,33,0.10); stroke: #A87A21; stroke-width: 1; }
-            .sq-note-t { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #6C5F51; }
+            .sq-note-t { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12.5px; fill: #4E4033; }
           </style>
 
           <!-- ============ Actor headers ============ -->
@@ -696,106 +696,94 @@
           <text class="sq-sub" x="1165" y="60" text-anchor="middle">+44 7… · real handset</text>
 
           <!-- ============ Lifelines ============ -->
-          <line class="sq-life" x1="100"  y1="72" x2="100"  y2="860"/>
-          <line class="sq-life" x1="295"  y1="72" x2="295"  y2="860"/>
-          <line class="sq-life" x1="500"  y1="72" x2="500"  y2="860"/>
-          <line class="sq-life" x1="705"  y1="72" x2="705"  y2="860"/>
-          <line class="sq-life" x1="920"  y1="72" x2="920"  y2="860"/>
-          <line class="sq-life" x1="1165" y1="72" x2="1165" y2="860"/>
+          <line class="sq-life" x1="100"  y1="72" x2="100"  y2="940"/>
+          <line class="sq-life" x1="295"  y1="72" x2="295"  y2="940"/>
+          <line class="sq-life" x1="500"  y1="72" x2="500"  y2="940"/>
+          <line class="sq-life" x1="705"  y1="72" x2="705"  y2="940"/>
+          <line class="sq-life" x1="920"  y1="72" x2="920"  y2="940"/>
+          <line class="sq-life" x1="1165" y1="72" x2="1165" y2="940"/>
 
           <!-- ============ 1. UI → App ============ -->
-          <line class="sq-req" x1="100" y1="102" x2="295" y2="102" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="120" y="97">① POST /api/assign-job</text>
-          <text class="sq-m"   x="120" y="115">{ jobID: "4521" }</text>
+          <line class="sq-req" x1="100" y1="111" x2="295" y2="111" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="120" y="105">① POST /api/assign-job</text>
+          <text class="sq-m"   x="120" y="128">{ jobID: "4521" }</text>
 
           <!-- ============ 2. App → Memory: lookup by phone ============ -->
-          <line class="sq-req" x1="295" y1="152" x2="500" y2="152" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="147">② POST /Profiles/Lookup</text>
-          <text class="sq-m"   x="308" y="165">{ idType: "phone", value: TECH_PHONE }</text>
+          <line class="sq-req" x1="295" y1="176" x2="500" y2="176" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="170">② POST /Profiles/Lookup</text>
+          <text class="sq-m"   x="308" y="193">{ idType: "phone", value: TECH_PHONE }</text>
 
-          <!-- 3. Memory → App: profiles[] -->
-          <line class="sq-resp" x1="500" y1="192" x2="295" y2="192" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="187">profiles[] — every (phone, jobID) profile for this tech</text>
+          <!-- Memory → App: profiles[] -->
+          <line class="sq-resp" x1="500" y1="228" x2="295" y2="228" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="222">profiles[] — every (phone, jobID) profile for this tech</text>
 
-          <!-- Note: find_active_profile — scan traits for Job.status=='active' -->
-          <rect class="sq-note" x="220" y="208" width="360" height="42" rx="3"/>
-          <text class="sq-note-t" x="232" y="225">find_active_profile: for each pid, GET profile, check</text>
-          <text class="sq-note-t" x="232" y="240">Job.status. If any is <tspan style="font-family:'IBM Plex Mono',monospace">active</tspan> → return 409 to the UI.</text>
+          <!-- Note: find_active_profile returns the FULL profile — no re-GET on the 409 path -->
+          <rect class="sq-note" x="220" y="249" width="380" height="58" rx="3"/>
+          <text class="sq-note-t" x="232" y="271">find_active_profile: for each pid, GET profile, check</text>
+          <text class="sq-note-t" x="232" y="290">Job.status. If any is <tspan style="font-family:'IBM Plex Mono',monospace">active</tspan> → return the full profile → 409.</text>
 
-          <!-- ============ 4. App → Memory: create/resolve composite profile ============ -->
-          <line class="sq-req" x1="295" y1="278" x2="500" y2="278" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="273">③ POST /Stores/{store}/Profiles</text>
-          <text class="sq-m"   x="308" y="291">Contact: { phone, jobID }, Job: { status:"active", startedAt }</text>
-          <text class="sq-s"   x="308" y="306">matchingRules "phone AND jobID" → resolve if exists, else create</text>
+          <!-- ============ 3. App → Memory: create/resolve composite profile ============ -->
+          <line class="sq-req" x1="295" y1="345" x2="500" y2="345" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="339">③ POST /Stores/{store}/Profiles</text>
+          <text class="sq-m"   x="308" y="362">Contact: { phone, jobID }, Job: { status:"active", startedAt }</text>
+          <text class="sq-s"   x="308" y="380">matchingRules "phone AND jobID" → resolve if exists, else create</text>
 
-          <!-- 5. Memory → App: profile{id} -->
-          <line class="sq-resp" x1="500" y1="326" x2="295" y2="326" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="321">{ id: mem_profile_… }</text>
+          <!-- Memory → App: full profile with traits -->
+          <line class="sq-resp" x1="500" y1="412" x2="295" y2="412" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="405">profile { id, traits.Job } — includes conversationId / channelId if resumed</text>
 
-          <!-- ============ 6. App → Memory: PATCH Job traits ============ -->
-          <line class="sq-req" x1="295" y1="358" x2="500" y2="358" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="353">④ PATCH /Profiles/{id}</text>
-          <text class="sq-m"   x="308" y="371">Job: { status:"active", lastActiveAt }</text>
+          <!-- ============ 4. App → Conv v1: mint channelId (conditional — skipped on reuse) ============ -->
+          <line class="sq-req" x1="295" y1="470" x2="705" y2="470" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="464">④ POST /v1/Services/{svc}/Conversations</text>
+          <text class="sq-s"   x="308" y="488">only when no reusable Job.conversationId — mints a fresh CH- SID</text>
 
-          <!-- 7. GET /Profiles/{id} — check for existing conversationId (resume case) -->
-          <line class="sq-req" x1="295" y1="400" x2="500" y2="400" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="395">⑤ GET /Profiles/{id}</text>
-          <text class="sq-s"   x="308" y="413">does Job.conversationId already exist? (resume path)</text>
-          <line class="sq-resp" x1="500" y1="431" x2="295" y2="431" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="426">profile.traits → no conversationId (new-job path)</text>
+          <!-- Conv v1 → App: {sid: CH...} -->
+          <line class="sq-resp" x1="705" y1="518" x2="295" y2="518" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="511">channelId = "CH…"</text>
 
-          <!-- ============ 8. App → Conv v1: mint channelId ============ -->
-          <line class="sq-req" x1="295" y1="462" x2="705" y2="462" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="457">⑥ POST /v1/Services/{svc}/Conversations</text>
-          <text class="sq-s"   x="308" y="475">classic Conversation used purely to mint a fresh CH- SID</text>
+          <!-- ============ 5. App → Orchestrator: create conversation ============ -->
+          <line class="sq-req" x1="295" y1="560" x2="920" y2="560" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="554">⑤ POST /v2/Conversations</text>
+          <text class="sq-m"   x="308" y="577">configurationId, participants:</text>
+          <text class="sq-m"   x="322" y="597">CUSTOMER · profileId=(phone,jobID) · address=TECH_PHONE · channelId</text>
+          <text class="sq-m"   x="322" y="616">AI_AGENT · profileId=AI · address=AI_NUMBER · channelId</text>
 
-          <!-- 9. Conv v1 → App: {sid: CH...} -->
-          <line class="sq-resp" x1="705" y1="497" x2="295" y2="497" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="492">channelId = "CH…"</text>
+          <!-- Orchestrator → App: conversation -->
+          <line class="sq-resp" x1="920" y1="645" x2="295" y2="645" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-s" x="308" y="638">conversation { id, participants[…] }</text>
 
-          <!-- ============ 10. App → Orchestrator: create conversation ============ -->
-          <line class="sq-req" x1="295" y1="530" x2="920" y2="530" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="525">⑦ POST /v2/Conversations</text>
-          <text class="sq-m"   x="308" y="543">configurationId, participants:</text>
-          <text class="sq-m"   x="322" y="558">CUSTOMER · profileId=(phone,jobID) · address=TECH_PHONE · channelId</text>
-          <text class="sq-m"   x="322" y="573">AI_AGENT · profileId=AI · address=AI_NUMBER · channelId</text>
+          <!-- ============ 6. App → Memory: single combined PATCH ============ -->
+          <line class="sq-req" x1="295" y1="690" x2="500" y2="690" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="684">⑥ PATCH /Profiles/{id}</text>
+          <text class="sq-m"   x="308" y="707">Job: { status:"active", lastActiveAt, conversationId, channelId }</text>
+          <text class="sq-s"   x="308" y="726">one write — status flip + trait wire — the router reads this on every inbound</text>
 
-          <!-- 11. Orchestrator → App: conversation -->
-          <line class="sq-resp" x1="920" y1="595" x2="295" y2="595" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-s" x="308" y="590">conversation { id, participants[…] }</text>
+          <!-- ============ 7. App → Orchestrator: send welcome via /Actions ============ -->
+          <line class="sq-req" x1="295" y1="770" x2="920" y2="770" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="764">⑦ POST /v2/Conversations/{id}/Actions</text>
+          <text class="sq-m"   x="308" y="787">type: SEND_MESSAGE · from: AI_NUMBER · to: TECH_PHONE</text>
+          <text class="sq-m"   x="308" y="806">body: "[Dispatcher] Hi Tech, you've been assigned job 4521…"</text>
 
-          <!-- ============ 12. App → Memory: PATCH conversationId + channelId onto profile ============ -->
-          <line class="sq-req" x1="295" y1="626" x2="500" y2="626" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="621">⑧ PATCH /Profiles/{id}</text>
-          <text class="sq-m"   x="308" y="639">Job: { conversationId, channelId }</text>
-          <text class="sq-s"   x="308" y="654">the trait that makes the router work — one Twilio read from here on</text>
+          <!-- Orchestrator → Tech phone: real SMS -->
+          <line class="sq-sms" x1="920" y1="838" x2="1165" y2="838" marker-end="url(#sq-arr-sms)"/>
+          <text class="sq-lbl" x="932" y="831" fill="#B5502E">⑧ SMS delivered</text>
+          <text class="sq-s"   x="932" y="855">carrier-side; real handset lights up</text>
 
-          <!-- ============ 13. App → Orchestrator: send welcome via /Actions ============ -->
-          <line class="sq-req" x1="295" y1="686" x2="920" y2="686" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="681">⑨ POST /v2/Conversations/{id}/Actions</text>
-          <text class="sq-m"   x="308" y="699">type: SEND_MESSAGE · from: AI_NUMBER · to: TECH_PHONE</text>
-          <text class="sq-m"   x="308" y="714">body: "[Dispatcher] Hi Tech, you've been assigned job 4521…"</text>
+          <!-- ============ 9. App → Orchestrator: record outbound communication ============ -->
+          <line class="sq-req" x1="295" y1="890" x2="920" y2="890" marker-end="url(#sq-arr)"/>
+          <text class="sq-lbl" x="308" y="884">⑨ POST /v2/Conversations/{id}/Communications</text>
+          <text class="sq-s"   x="308" y="908">bookkeep the outbound so the transcript shows it (Actions doesn't auto-record)</text>
 
-          <!-- 14. Orchestrator → Tech phone: real SMS -->
-          <line class="sq-sms" x1="920" y1="738" x2="1165" y2="738" marker-end="url(#sq-arr-sms)"/>
-          <text class="sq-lbl" x="932" y="733" fill="#B5502E">⑩ SMS delivered</text>
-          <text class="sq-s"   x="932" y="751">carrier-side; real handset lights up</text>
-
-          <!-- ============ 15. App → Orchestrator: record outbound communication ============ -->
-          <line class="sq-req" x1="295" y1="782" x2="920" y2="782" marker-end="url(#sq-arr)"/>
-          <text class="sq-lbl" x="308" y="777">⑪ POST /v2/Conversations/{id}/Communications</text>
-          <text class="sq-s"   x="308" y="795">bookkeep the outbound so the transcript shows it (Actions doesn't auto-record)</text>
-
-          <!-- ============ 16. App → UI: ack ============ -->
-          <line class="sq-resp" x1="295" y1="828" x2="100" y2="828" marker-end="url(#sq-arr-back)"/>
-          <text class="sq-lbl" x="120" y="823">⑫ 200 OK</text>
-          <text class="sq-m"   x="120" y="843">{ profileId, conversationId, resumed:false }</text>
+          <!-- ============ 10. App → UI: ack ============ -->
+          <line class="sq-resp" x1="295" y1="940" x2="100" y2="940" marker-end="url(#sq-arr-back)"/>
+          <text class="sq-lbl" x="120" y="934">⑩ 200 OK</text>
+          <text class="sq-m"   x="120" y="957">{ profileId, conversationId, resumed:false }</text>
         </svg>
       </div>
       <p class="diagram-caption">
-        Ten Twilio calls, one welcome SMS, zero application-side tables. The profile trait
-        <span style="font-family:var(--font-m);font-size:12px">Job.conversationId</span> is what makes
-        the next inbound SMS route in a single lookup.
+        One POST creates or resolves; one PATCH mutates. Steps ④–⑤ are skipped entirely on the
+        resume path when <span style="font-family:var(--font-m);font-size:12px">Job.conversationId</span>
+        already points at an open conversation.
       </p>
     </div>
   </section>

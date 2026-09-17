@@ -263,9 +263,9 @@ async def assign_job(body: AssignJobBody) -> dict:
     job_id = body.jobID.strip()
 
     # 1. Refuse if this tech already has an active job.
-    active_pid = await tw.find_active_profile(STORE_ID, TECH_PHONE)
-    if active_pid:
-        active_prof = await tw.get_profile(STORE_ID, active_pid)
+    #    find_active_profile returns the full profile — read jobID off it directly.
+    active_prof = await tw.find_active_profile(STORE_ID, TECH_PHONE)
+    if active_prof:
         active_job_id = _profile_job_id(active_prof) or "?"
         raise HTTPException(
             409,
@@ -273,23 +273,19 @@ async def assign_job(body: AssignJobBody) -> dict:
             "Complete or pause it before assigning a new one.",
         )
 
-    # 2. Create/resolve the (phone, jobID) profile with Job.status=active.
-    create_resp = await tw.create_or_resolve_profile(
+    # 2. Create/resolve the (phone, jobID) profile. The response carries the
+    #    resolved profile's current traits — including any prior Job.conversationId
+    #    / channelId from a resumed profile, so no follow-up GET is needed.
+    prof = await tw.create_or_resolve_profile(
         STORE_ID, TECH_PHONE, job_id, first_name=body.firstName or TECH_NAME
     )
-    profile_id = create_resp["id"]
-    await tw.patch_profile_traits(
-        STORE_ID,
-        profile_id,
-        {"Job": {"status": "active", "lastActiveAt": _now_iso()}},
-    )
+    profile_id = prof["id"]
+    existing_conv_id = _job_traits(prof).get("conversationId")
+    channel_id = _job_traits(prof).get("channelId")
 
     # 3. Reuse an existing open conversation if the profile pre-existed (resume case).
-    prof = await tw.get_profile(STORE_ID, profile_id)
-    existing_conv_id = _job_traits(prof).get("conversationId")
     conv = None
     conv_id = None
-    channel_id = _job_traits(prof).get("channelId")
     if existing_conv_id:
         try:
             existing_conv = await tw.get_conversation(existing_conv_id)
@@ -312,13 +308,20 @@ async def assign_job(body: AssignJobBody) -> dict:
             channel_id=channel_id,
         )
         conv_id = conv["id"]
-        await tw.patch_profile_traits(
-            STORE_ID,
-            profile_id,
-            {"Job": {"conversationId": conv_id, "channelId": channel_id}},
-        )
 
-    # 5. Send a welcome SMS from the dispatcher persona (real SMS + record it).
+    # 5. One PATCH: flip status active, refresh timestamp, wire conversation.
+    await tw.patch_profile_traits(
+        STORE_ID,
+        profile_id,
+        {"Job": {
+            "status": "active",
+            "lastActiveAt": _now_iso(),
+            "conversationId": conv_id,
+            "channelId": channel_id,
+        }},
+    )
+
+    # 6. Send a welcome SMS from the dispatcher persona (real SMS + record it).
     tech = await _find_tech_participant(conv)
     ai = await _find_ai_participant(conv)
     channel_id = _channel_id_for(tech, TECH_PHONE) or channel_id
@@ -448,9 +451,9 @@ async def delete_profile(profile_id: str) -> dict:
 async def reactivate_job(body: ProfileBody) -> dict:
     # Pause any current active for this tech, and inactivate its Twilio conversation
     # so Orchestrator doesn't have two ACTIVE threads on the same phone number.
-    active_pid = await tw.find_active_profile(STORE_ID, TECH_PHONE)
-    if active_pid and active_pid != body.profileId:
-        active_prof = await tw.get_profile(STORE_ID, active_pid)
+    active_prof = await tw.find_active_profile(STORE_ID, TECH_PHONE)
+    if active_prof and active_prof.get("id") != body.profileId:
+        active_pid = active_prof["id"]
         active_conv_id = _job_traits(active_prof).get("conversationId")
         await tw.patch_profile_traits(
             STORE_ID,
@@ -463,16 +466,11 @@ async def reactivate_job(body: ProfileBody) -> dict:
                 log.info("reactivate paused prior conversation %s", active_conv_id)
             except tw.TwilioError as e:
                 log.warning("could not inactivate prior conversation %s: %s", active_conv_id, e)
-    # Flip target to active.
-    await tw.patch_profile_traits(
-        STORE_ID,
-        body.profileId,
-        {"Job": {"status": "active", "lastActiveAt": _now_iso(), "completedAt": None}},
-    )
-    # If its conversation is CLOSED, create a new one; otherwise reuse.
+
+    # Read the target profile once to see its current conversation state.
     prof = await tw.get_profile(STORE_ID, body.profileId)
     conv_id = _job_traits(prof).get("conversationId")
-    job_id = _profile_job_id(prof) or ""
+    channel_id = _job_traits(prof).get("channelId")
     need_new = True
     if conv_id:
         try:
@@ -492,12 +490,20 @@ async def reactivate_job(body: ProfileBody) -> dict:
             ai_number=AI_NUMBER,
             channel_id=channel_id,
         )
-        await tw.patch_profile_traits(
-            STORE_ID,
-            body.profileId,
-            {"Job": {"conversationId": conv["id"], "channelId": channel_id}},
-        )
         conv_id = conv["id"]
+
+    # One PATCH: flip target to active + (re)wire conversation.
+    await tw.patch_profile_traits(
+        STORE_ID,
+        body.profileId,
+        {"Job": {
+            "status": "active",
+            "lastActiveAt": _now_iso(),
+            "completedAt": None,
+            "conversationId": conv_id,
+            "channelId": channel_id,
+        }},
+    )
     return {"ok": True, "conversationId": conv_id}
 
 
@@ -506,8 +512,8 @@ async def reactivate_job(body: ProfileBody) -> dict:
 async def _route_inbound_sms(from_: str, to: str, body: str, message_sid: str | None) -> PlainTextResponse:
     """Route an inbound SMS (from either the number-level webhook or the generic /webhook)."""
     log.info("Inbound SMS: MessageSid=%s From=%s To=%s Body=%r", message_sid, from_, to, body[:200])
-    active_pid = await tw.find_active_profile(STORE_ID, from_)
-    if not active_pid:
+    active_prof = await tw.find_active_profile(STORE_ID, from_)
+    if not active_prof:
         log.warning("No active profile found for phone=%s — replying with 'not assigned' TwiML.", from_)
         twiml = (
             "<?xml version='1.0' encoding='UTF-8'?>"
@@ -515,8 +521,8 @@ async def _route_inbound_sms(from_: str, to: str, body: str, message_sid: str | 
             "Please contact dispatch.</Message></Response>"
         )
         return PlainTextResponse(twiml, media_type="application/xml")
-    prof = await tw.get_profile(STORE_ID, active_pid)
-    conv_id = _job_traits(prof).get("conversationId")
+    active_pid = active_prof["id"]
+    conv_id = _job_traits(active_prof).get("conversationId")
     log.info("Routed to active profile=%s conversationId=%s", active_pid, conv_id)
     if not conv_id:
         log.warning("Active profile=%s has no conversationId trait — replying with fallback TwiML.", active_pid)

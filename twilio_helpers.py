@@ -186,14 +186,18 @@ async def resolve_composite(store_id: str, phone: str, job_id: str) -> str | Non
     return None
 
 
-async def find_active_profile(store_id: str, phone: str) -> str | None:
-    """Given a phone, return the profile whose Job.status == 'active', or None."""
+async def find_active_profile(store_id: str, phone: str) -> dict | None:
+    """Given a phone, return the full profile whose Job.status == 'active', or None.
+
+    Returns the profile object (not just its id) so callers can read traits
+    without a second GET.
+    """
     for pid in await lookup_profiles_by_phone(store_id, phone):
         prof = await get_profile(store_id, pid)
         traits = prof.get("traits", {}) or {}
         job = traits.get("Job", {}) or {}
         if job.get("status") == "active":
-            return pid
+            return prof
     return None
 
 
