@@ -862,6 +862,64 @@
   </section>
 
   <!-- ============================================================ -->
+  <!-- SLIDE 4b — Assign new job · Mermaid preview                   -->
+  <!-- ============================================================ -->
+  <section class="slide" data-menu="Assign new job (Mermaid)" data-menu-group="Sequence diagrams">
+    <div class="slide-inner">
+      <div class="eyebrow dusty">Sequence · Assign new job · Mermaid</div>
+      <h1>Same diagram, declarative source.</h1>
+      <p class="lede">
+        Every step is one line of text — reorder or insert without touching pixel math.
+        Palette pulled from the Paper theme via <code>themeVariables</code>.
+      </p>
+
+      <div class="diagram-panel uml" style="padding: 24px 32px;">
+        <div class="diagram-label">POST /api/assign-job · Mermaid version</div>
+        <pre class="mermaid" style="background: transparent; margin: 0; text-align: center;">
+sequenceDiagram
+  autonumber
+  actor UI as Admin UI
+  participant App as App
+  participant Mem as Twilio Memory
+  participant CV1 as Conversation v1
+  participant Orc as Orchestrator v2
+  actor Tech as Tech phone
+
+  UI->>App: POST /api/assign-job { job_id }
+  activate App
+  App->>Mem: POST /Profiles/Lookup { TECH_PHONE }
+  Mem-->>App: profiles[]
+  Note over App,Mem: find_active_profile — iterate pids, check Job.status.<br/>If any active → return the full profile and 409.
+  App-->>UI: 409 Conflict.<br/> Active profile exists. <br/>{ profile_id, active: true }
+
+  App->>Mem: POST /Stores/{store_id}/Profiles<br/>Contact:{ TECH_PHONE, job_id }, Job:{ status:"active" }
+  Mem-->>App: profile { profile_id, traits.Job }  
+
+    alt no reusable Job.conversationId
+      App->>CV1: POST /v1/Services/{service_id}/Conversations
+      CV1-->>App: channel_id = "CH6757XXX..."
+      App->>Orc: POST /v2/Conversations<br/>orchestrator_config_id + participant (CUSTOMER, SMS, TECH_PHONE, channel_id) + participant (AI_AGENT, SMS, TWILIO_PHONE, channel_id)
+      Orc-->>App: conversation_id 
+      App->>Mem: PATCH /Profiles/{id}<br/>Job:{ status, lastActiveAt, conversation_id, channel_id }
+    end
+
+    App->>Orc: POST /Conversations/{conversation_id}/Actions<br/>SEND_MESSAGE · AI_NUMBER (participant_id) → TECH_PHONE (participant_id)
+    Orc->>Tech: SMS delivered
+    App->>Orc: POST /Conversations/{conversation_id}/Communications<br/>(bookkeeping for conversations v2)
+    App-->>UI: 200 OK { profile_id, conversation_id}
+
+  deactivate App
+        </pre>
+      </div>
+      <p class="diagram-caption">
+        Same routing, same alt branches, zero <code>x</code>/<code>y</code>.
+        Trade-off: Mermaid picks the exact positioning — you lose mid-line
+        <span style="font-family:var(--font-m);font-size:12px">monospace tspans</span> inside notes.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
   <!-- SLIDE 5 — Differentiation · Bringing it home                  -->
   <!-- ============================================================ -->
   <section class="slide" data-menu="Bringing it home" data-menu-group="Differentiation">
@@ -988,6 +1046,49 @@
   });
 
   goTo(0);
+</script>
+
+<!-- Mermaid: declarative sequence diagrams themed to the Paper palette -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    theme: 'base',
+    themeVariables: {
+      fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+      fontSize: '14px',
+      primaryColor:        '#FDD35C',
+      primaryBorderColor:  '#E8A62A',
+      primaryTextColor:    '#D9482E',
+      lineColor:           '#E88030',
+      signalColor:         '#E88030',
+      signalTextColor:     '#2B241E',
+      noteBkgColor:        '#FFF6DC',
+      noteBorderColor:     '#E8A62A',
+      noteTextColor:       '#4E4033',
+      actorBkg:            '#FDD35C',
+      actorBorder:         '#E8A62A',
+      actorTextColor:      '#D9482E',
+      actorLineColor:      '#E88030',
+      activationBkgColor:  '#F0EFEA',
+      activationBorderColor:'#B8B0A0',
+      labelBoxBkgColor:    '#EEF3F9',
+      labelBoxBorderColor: '#6BA4E7',
+      labelTextColor:      '#4A6B85',
+      sequenceNumberColor: '#2B241E',
+      altBackground:       'rgba(107,164,231,0.06)'
+    },
+    sequence: {
+      diagramMarginX: 24,
+      diagramMarginY: 12,
+      boxMargin: 20,
+      noteMargin: 12,
+      messageMargin: 50,
+      mirrorActors: false,
+      wrap: true
+    }
+  });
 </script>
 
 </body>
